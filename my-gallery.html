@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
@@ -7,7 +6,8 @@
     <title>my-gallery</title>
 </head>
 <style>
-    html,body {
+    html,
+    body {
         height: 100%;
         background-color: rgb(75, 109, 109);
     }
@@ -17,35 +17,34 @@
         width: 100%;
         object-fit: contain;
     }
-
 </style>
 
 <body>
-    
-    <img class="slides" id="image"  alt="תמונה" />
+
+    <img class="slides" id="image" alt="תמונה" />
 
 </body>
 <script>
 
-const count = 20;
-var images = [];
+    const count = 20;
+    var images = [];
 
 
-for (var i = 1; i <= count; i++) {
-    images.push("photos/" + i + ".jpeg");
-}
+    for (var i = 1; i <= count; i++) {
+        images.push("photos/" + i + ".jpeg");
+    }
 
 
-var currentIndex = 0;
-var slideshowElement = document.getElementById("image");
+    var currentIndex = 0;
+    var slideshowElement = document.getElementById("image");
 
-function changeImage() {
-  slideshowElement.src = images[currentIndex];
-  currentIndex = (currentIndex + 1) % images.length;
-}
-changeImage();
+    function changeImage() {
+        slideshowElement.src = images[currentIndex];
+        currentIndex = (currentIndex + 1) % images.length;
+    }
+    changeImage();
 
-setInterval(changeImage, 4000);
+    setInterval(changeImage, 4000);
 
 
 </script>
