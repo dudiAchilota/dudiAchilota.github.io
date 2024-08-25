@@ -12,48 +12,60 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         .container {
             width: 80%;
             margin: 20px auto;
             border: 1px solid #ccc;
             border-radius: 8px;
-            overflow: hidden;
+            overflow-x: auto;
         }
+
         .section {
             padding: 20px;
         }
+
         .section:nth-of-type(2) {
             border-top: 2px solid #000;
         }
+
         .table-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
         }
+
         .table-container div {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         .table-container p {
             margin: 10px 0;
         }
+
         .team-list-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+            justify-items: center;
         }
+
         .team-list {
             list-style: none;
             padding: 0;
             text-align: center;
         }
+
         .team-list li {
             margin: 10px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            text-align: left;
         }
+
         .team-list select {
             margin-left: 10px;
             padding: 5px;
@@ -61,10 +73,12 @@
             border: 1px solid #ccc;
             cursor: pointer;
         }
+
         .team-list h3 {
             margin-bottom: 10px;
             text-align: center;
         }
+
         .reset-button {
             display: block;
             width: 150px;
@@ -77,8 +91,29 @@
             cursor: pointer;
             text-align: center;
         }
+
         .reset-button:hover {
             background-color: #d32f2f;
+        }
+
+        .color-tier-0 {
+            color: black;
+        }
+
+        .color-tier-1 {
+            color: blue;
+        }
+
+        .color-tier-2 {
+            color: goldenrod;
+        }
+
+        .color-tier-3 {
+            color: green;
+        }
+
+        .color-tier-4 {
+            color: red;
         }
     </style>
 </head>
@@ -97,35 +132,35 @@
                 'tier-4': Array(12).fill('')
             };
 
-
-
             const initialTeams = {
-                'A': ['Real Madrid','Manchester City', 'Bayern Munich', 'Paris Saint-Germain', 'Liverpool', 
-                        'Inter Milan', 'Borussia Dortmund', 'RB Leipzig', 'Barcelona'],
-                'B': ['Bayer Leverkusen', 'Atlético Madrid', 'Atalanta', 'Juventus', 'Benfica'
-                        , 'Arsenal', 'Club Brugge' , 'Shakhtar Donetsk', 'Milan'],
+                'A': ['Real Madrid', 'Manchester City', 'Bayern Munich', 'Paris Saint-Germain', 'Liverpool',
+                    'Inter Milan', 'Borussia Dortmund', 'RB Leipzig', 'Barcelona'],
+                'B': ['Bayer Leverkusen', 'Atlético Madrid', 'Atalanta', 'Juventus', 'Benfica',
+                    'Arsenal', 'Club Brugge', 'Shakhtar Donetsk', 'Milan'],
                 'C': ['Feyenoord', 'Sporting CP', 'PSV Eindhoven', 'Celtic'],
-                
-                'D': [ 'Monaco', 'Aston Villa', 'Bologna', 'Girona', 'VfB Stuttgart'
-                        , 'Sturm Graz', 'Brest']
+                'D': ['Monaco', 'Aston Villa', 'Bologna', 'Girona', 'VfB Stuttgart',
+                    'Sturm Graz', 'Brest']
             };
-
 
             const [teamData, setTeamData] = React.useState(() => {
                 const storedData = JSON.parse(localStorage.getItem('teamData'));
                 return storedData || initialData;
             });
 
-            const [teams, setTeams] = React.useState(initialTeams);
+            const [teamColors, setTeamColors] = React.useState(() => {
+                const storedColors = JSON.parse(localStorage.getItem('teamColors'));
+                return storedColors || {};
+            });
 
             React.useEffect(() => {
                 localStorage.setItem('teamData', JSON.stringify(teamData));
-            }, [teamData]);
+                localStorage.setItem('teamColors', JSON.stringify(teamColors));
+            }, [teamData, teamColors]);
 
             const assignTeam = (teamName, tier) => {
                 removeTeamFromAllTiers(teamName);
                 const updatedTier = [...teamData[tier]];
-                
+
                 for (let i = 0; i < updatedTier.length; i++) {
                     if (updatedTier[i] === '') {
                         updatedTier[i] = teamName;
@@ -149,10 +184,14 @@
                 }
 
                 setTeamData(updatedData);
+                const updatedColors = { ...teamColors };
+                delete updatedColors[teamName];
+                setTeamColors(updatedColors);
             };
 
             const resetAll = () => {
                 setTeamData(initialData);
+                setTeamColors({});
             };
 
             const handleSelectChange = (teamName, event) => {
@@ -161,6 +200,10 @@
                     removeTeamFromAllTiers(teamName);
                 } else {
                     assignTeam(teamName, value);
+                    setTeamColors(prevColors => ({
+                        ...prevColors,
+                        [teamName]: value
+                    }));
                 }
             };
 
@@ -173,6 +216,10 @@
                 return '';
             };
 
+            const getColorClass = (teamName) => {
+                return teamColors[teamName] ? `color-${teamColors[teamName]}` : '';
+            };
+
             return (
                 <div className="container">
                     <div className="section">
@@ -180,9 +227,9 @@
                         <div className="table-container">
                             {['tier-1', 'tier-2', 'tier-3', 'tier-4'].map((tier, index) => (
                                 <div key={tier} id={tier}>
-                                    <h3>{index === 0 ? '1-8' : index === 1 ? '9-16' : index === 2 ? '17-24' : '25-32'}</h3>
+                                    <h3>{index === 0 ? '1-8' : index === 1 ? '9-16' : index === 2 ? '17-24' : '25-36'}</h3>
                                     {teamData[tier].map((team, i) => (
-                                        <p key={i}>{team}</p>
+                                        <p key={i} className={getColorClass(team)}>{team}</p>
                                     ))}
                                 </div>
                             ))}
@@ -191,22 +238,22 @@
                     <div className="section">
                         <h2>Champions League Teams</h2>
                         <div className="team-list-container">
-                            {Object.keys(teams).map(letter => (
+                            {Object.keys(initialTeams).map(letter => (
                                 <div className="team-list" key={letter}>
                                     <h3>{letter}</h3>
                                     <ul>
-                                        {teams[letter].map(team => (
-                                            <li key={team}>
+                                        {initialTeams[letter].map(team => (
+                                            <li key={team} className={getColorClass(team)}>
                                                 {team}
-                                                <select 
+                                                <select
                                                     value={getCurrentTierForTeam(team) || ''}
                                                     onChange={(e) => handleSelectChange(team, e)}
                                                 >
-                                                    <option value="">Select</option>
+                                                    <option value="tier-0">Select</option>
                                                     <option value="tier-1">1-8</option>
                                                     <option value="tier-2">9-16</option>
                                                     <option value="tier-3">17-24</option>
-                                                    <option value="tier-4">25-32</option>
+                                                    <option value="tier-4">25-36</option>
                                                     <option value="remove">Remove</option>
                                                 </select>
                                             </li>
@@ -224,4 +271,5 @@
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
+
 </html>
