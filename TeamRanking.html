@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,6 +118,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="root"></div>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -199,11 +201,16 @@
                 if (value === 'remove') {
                     removeTeamFromAllTiers(teamName);
                 } else {
-                    assignTeam(teamName, value);
-                    setTeamColors(prevColors => ({
-                        ...prevColors,
-                        [teamName]: value
-                    }));
+                    const updatedTier = [...teamData[value]];
+                    const emptySlotIndex = updatedTier.findIndex(team => team === '');
+
+                    if (emptySlotIndex !== -1) { // Check if there is an empty slot
+                        assignTeam(teamName, value);
+                        setTeamColors(prevColors => ({
+                            ...prevColors,
+                            [teamName]: value
+                        }));
+                    }
                 }
             };
 
