@@ -1,11 +1,326 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <title>playlist</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="photos/icon.webp" type="image/x-icon">
+    <title>Champions League ⚽</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+            background-image: url('photos/106.jpeg');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+        }
+
+        #tier-4 p {
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+
+        #tier-1,
+        #tier-2,
+        #tier-3,
+        #tier-4 {
+            background-color: orange;
+        }
+
+        h1,
+        h2 {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .section {
+            padding: 20px;
+        }
+
+        .section:nth-of-type(2) {
+            border-top: 1px solid #000;
+        }
+
+        .table-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .table-container div {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .table-container p {
+            margin: 10px 0;
+        }
+
+        .team-list-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .team-list {
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        .team-list li {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .team-list select {
+            margin-top: 5px;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .team-list h3 {
+            margin-bottom: 10px;
+        }
+
+        .reset-button {
+            display: block;
+            width: 100%;
+            max-width: 150px;
+            padding: 10px;
+            margin: 20px auto;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .color-tier-0 {
+            color: black;
+        }
+
+        .color-tier-1 {
+            color: blue;
+        }
+
+        .color-tier-2 {
+            color: brown;
+        }
+
+        .color-tier-3 {
+            color: green;
+        }
+
+        .color-tier-4 {
+            color: red;
+        }
+
+        /* Media Queries for Mobile Devices */
+        @media (max-width: 600px) {
+            .table-container {
+                grid-template-columns: 1fr;
+            }
+
+            .team-list-container {
+                grid-template-columns: 1fr;
+            }
+
+            .reset-button {
+                width: 90%;
+                max-width: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
 
-  123          3
+    <script type="text/babel">
 
+        function App() {
+            const initialData = {
+                'tier-1': Array(8).fill(''),
+                'tier-2': Array(8).fill(''),
+                'tier-3': Array(8).fill(''),
+                'tier-4': Array(12).fill('')
+            };
+
+            const initialTeams = {
+                'A': ['Real Madrid','Manchester City', 'Bayern Munich', 'Paris Saint Germain', 'Liverpool', 
+                        'Inter Milan', 'Borussia Dortmund', 'RB Leipzig', 'Barcelona'],
+                'B': ['Bayer Leverkusen', 'Atlético Madrid', 'Atalanta', 'Juventus', 'Benfica',
+                        'Arsenal', 'Club Brugge' , 'Shakhtar Donetsk', 'Milan'],
+                'C': ['Feyenoord', 'Sporting CP', 'PSV Eindhoven','Dinamo Zagreb','Red Bull Salzburg',
+                        'Lille','Red Star Belgrade','Young Boys','Celtic'],               
+                'D': ['Slovan Bratislava','Monaco','Sparta Prague' ,'Aston Villa', 'Bologna',
+                        'Girona', 'VfB Stuttgart' , 'Sturm Graz', 'Brest']
+            };
+
+
+            const [teamData, setTeamData] = React.useState(() => {
+                const storedData = JSON.parse(localStorage.getItem('teamData'));
+                return storedData || initialData;
+            });
+
+            const [teamColors, setTeamColors] = React.useState(() => {
+                const storedColors = JSON.parse(localStorage.getItem('teamColors'));
+                return storedColors || {};
+            });
+
+            React.useEffect(() => {
+                localStorage.setItem('teamData', JSON.stringify(teamData));
+                localStorage.setItem('teamColors', JSON.stringify(teamColors));
+            }, [teamData, teamColors]);
+
+            const assignTeam = (teamName, tier) => {
+                removeTeamFromAllTiers(teamName);
+                const updatedTier = [...teamData[tier]];
+
+                for (let i = 0; i < updatedTier.length; i++) {
+                    if (updatedTier[i] === '') {
+                        updatedTier[i] = teamName;
+                        setTeamData(prevData => ({
+                            ...prevData,
+                            [tier]: updatedTier
+                        }));
+                        break;
+                    }
+                }
+            };
+
+            const removeTeamFromAllTiers = (teamName) => {
+                const updatedData = { ...teamData };
+
+                for (const tier in updatedData) {
+                    const index = updatedData[tier].indexOf(teamName);
+                    if (index !== -1) {
+                        updatedData[tier][index] = '';
+                    }
+                }
+
+                setTeamData(updatedData);
+                const updatedColors = { ...teamColors };
+                delete updatedColors[teamName];
+                setTeamColors(updatedColors);
+            };
+
+            const resetAll = () => {
+                setTeamData(initialData);
+                setTeamColors({});
+            };
+
+            const handleSelectChange = (teamName, event) => {
+                const value = event.target.value;
+                if (value === 'remove') {
+                    removeTeamFromAllTiers(teamName);
+                } else {
+                    const updatedTier = [...teamData[value]];
+                    const emptySlotIndex = updatedTier.findIndex(team => team === '');
+
+                    if (emptySlotIndex !== -1) { // Check if there is an empty slot
+                        assignTeam(teamName, value);
+                        setTeamColors(prevColors => ({
+                            ...prevColors,
+                            [teamName]: value
+                        }));
+                    }
+                }
+            };
+
+            const getCurrentTierForTeam = (teamName) => {
+                for (const tier in teamData) {
+                    if (teamData[tier].includes(teamName)) {
+                        return tier;
+                    }
+                }
+                return '';
+            };
+
+            const getColorClass = (teamName) => {
+                return teamColors[teamName] ? `color-${teamColors[teamName]}` : '';
+            };
+
+            return (
+                <div className="container">
+                    <div className="section">
+                        <br />
+                        <h1>Team ranking of the Champions League season 24/25</h1>
+                        <div className="table-container">
+                            {['tier-1', 'tier-2', 'tier-3', 'tier-4'].map((tier, index) => (
+                                <div key={tier} id={tier}>
+                                    <h3>{index === 0 ? 'Places 1-8' : index === 1 ? 'Places 9-16'
+                                        : index === 2 ? 'Places 17-24' : 'Places 25-36'}</h3>
+                                    {teamData[tier].map((team, i) => (
+                                        <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="section">
+                        <h2>Champions League Teams</h2>
+                        <div className="team-list-container">
+                            {Object.keys(initialTeams).map(letter => (
+                                <div className="team-list" key={letter}>
+                                    <h3>{letter}</h3>
+                                    <ul>
+                                        {initialTeams[letter].map(team => (
+                                            <li key={team} className={getColorClass(team)}>
+                                                {team}
+                                                <select
+                                                    value={getCurrentTierForTeam(team) || ''}
+                                                    onChange={(e) => handleSelectChange(team, e)}
+                                                >
+                                                    <option value="tier-0">Select</option>
+                                                    <option value="tier-1">1-8</option>
+                                                    <option value="tier-2">9-16</option>
+                                                    <option value="tier-3">17-24</option>
+                                                    <option value="tier-4">25-36</option>
+                                                    <option value="remove">Remove</option>
+                                                </select>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <br />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <button className="reset-button" onClick={resetAll}>Reset All</button>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
+
 </html>
