@@ -37,52 +37,53 @@
         }
 
         .container {
-            width: 90%;
-            margin: 20px auto;
-            border-radius: 8px;
-            overflow-x: auto;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .section {
-            padding: 20px;
+            padding: 0;
+            margin: 0;
         }
 
-        .section:nth-of-type(2) {
-            border-top: 1px solid #000;
-        }
-
-        .table-container {
+        .top-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
         }
 
-        .table-container div {
+        .top-container div {
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            box-sizing: border-box;
         }
 
-        .table-container p {
-            margin: 10px 0;
+        .bottom-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0;
+        }
+
+        .bottom-container div {
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
         .team-list-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0;
             justify-items: center;
-        }
-
-        @media (min-width: 600px) {
-            .team-list-container {
-                grid-template-columns: repeat(4, 1fr);
-            }
+            padding: 0;
         }
 
         .team-list {
             list-style: none;
             padding: 0;
+            margin: 0;
             text-align: center;
         }
 
@@ -91,6 +92,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            text-align: left;
         }
 
         .team-list select {
@@ -128,7 +130,7 @@
         }
 
         .color-tier-1 {
-            color: blue;
+            color: blue
         }
 
         .color-tier-2 {
@@ -152,6 +154,7 @@
     <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
 
     <script type="text/babel">
+
         function App() {
             const initialData = {
                 'tier-1': Array(8).fill(''),
@@ -161,14 +164,14 @@
             };
 
             const initialTeams = {
-                'A': ['Real Madrid', 'Manchester City', 'Bayern Munich', 'Paris Saint Germain', 'Liverpool',
-                    'Inter Milan', 'Borussia Dortmund', 'RB Leipzig', 'Barcelona'],
-                'B': ['Bayer Leverkusen', 'Atlético Madrid', 'Atalanta', 'Juventus', 'Benfica'
-                    , 'Arsenal', 'Club Brugge', 'Shakhtar Donetsk', 'Milan'],
-                'C': ['Feyenoord', 'Sporting CP', 'PSV Eindhoven', 'Red Bull Salzburg', 'Young Boys'
-                    , 'Celtic'],
-                'D': ['Monaco', 'Sparta Prague', 'Aston Villa', 'Bologna', 'Girona'
-                    , 'VfB Stuttgart', 'Sturm Graz', 'Brest']
+                'POT 1': ['Real Madrid','Manchester City', 'Bayern Munich', 'Paris Saint Germain', 'Liverpool', 
+                        'Inter Milan', 'Borussia Dortmund', 'RB Leipzig', 'Barcelona'],
+                'POT 2': ['Bayer Leverkusen', 'Atlético Madrid', 'Atalanta', 'Juventus', 'Benfica',
+                        'Arsenal', 'Club Brugge' , 'Shakhtar Donetsk', 'Milan'],
+                'POT 3': ['Feyenoord', 'Sporting CP', 'PSV Eindhoven','Dinamo Zagreb','Red Bull Salzburg',
+                        'Lille','Red Star Belgrade','Young Boys','Celtic'],               
+                'POT 4': ['Slovan Bratislava','Monaco','Sparta Prague' ,'Aston Villa', 'Bologna',
+                        'Girona', 'VfB Stuttgart' , 'Sturm Graz', 'Brest']
             };
 
             const [teamData, setTeamData] = React.useState(() => {
@@ -231,7 +234,7 @@
                     const updatedTier = [...teamData[value]];
                     const emptySlotIndex = updatedTier.findIndex(team => team === '');
 
-                    if (emptySlotIndex !== -1) { // Check if there is an empty slot
+                    if (emptySlotIndex !== -1) { 
                         assignTeam(teamName, value);
                         setTeamColors(prevColors => ({
                             ...prevColors,
@@ -256,49 +259,60 @@
 
             return (
                 <div className="container">
-                    <div className="section">
-                        <br />
-                        <h1>Team ranking of the Champions League season 24/25</h1>
-                        <div className="table-container">
-                            {['tier-1', 'tier-2', 'tier-3', 'tier-4'].map((tier, index) => (
-                                <div key={tier} id={tier}>
-                                    <h3>{index === 0 ? 'Places 1-8' : index === 1 ? 'Places 9-16'
-                                        : index === 2 ? 'Places 17-24' : 'Places 25-36'}</h3>
-                                    {teamData[tier].map((team, i) => (
-                                        <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
-                                    ))}
-                                </div>
+                    <h1>Team ranking of the Champions League season 24/25</h1>
+                    <div className="top-container">
+                        <div id="tier-1">
+                            <h3>Places 1-8</h3>
+                            {teamData['tier-1'].map((team, i) => (
+                                <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
+                            ))}
+                        </div>
+                        <div id="tier-2">
+                            <h3>Places 9-16</h3>
+                            {teamData['tier-2'].map((team, i) => (
+                                <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
                             ))}
                         </div>
                     </div>
-                    <div className="section">
-                        <h2>Champions League Teams</h2>
-                        <div className="team-list-container">
-                            {Object.keys(initialTeams).map(letter => (
-                                <div className="team-list" key={letter}>
-                                    <h3>{letter}</h3>
-                                    <ul>                           
-                                            {initialTeams[letter].map(team => (
-                                            <li key={team} className={getColorClass(team)}>
-                                                <span>{team}</span>
-                                                <select
-                                                    value={getCurrentTierForTeam(team) || ''}
-                                                    onChange={(e) => handleSelectChange(team, e)}
-                                                >
-                                                    <option value="tier-0">Select</option>
-                                                    <option value="tier-1">1-8</option>
-                                                    <option value="tier-2">9-16</option>
-                                                    <option value="tier-3">17-24</option>
-                                                    <option value="tier-4">25-36</option>
-                                                    <option value="remove">Remove</option>
-                                                </select>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <br />
-                                </div>
+                    <div className="bottom-container">
+                        <div id="tier-3">
+                            <h3>Places 17-24</h3>
+                            {teamData['tier-3'].map((team, i) => (
+                                <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
                             ))}
                         </div>
+                        <div id="tier-4">
+                            <h3>Places 25-36</h3>
+                            {teamData['tier-4'].map((team, i) => (
+                                <p key={i} className={getColorClass(team)}>{team || '\u00A0'}</p>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="team-list-container">
+                        {Object.keys(initialTeams).map(letter => (
+                            <div key={letter} className="team-list">
+                                <h3>{letter}</h3>
+                                <ul>
+                                    {initialTeams[letter].map(team => (
+                                        <li key={team} className={getColorClass(team)}>
+                                            <span>{team}</span>
+                                            <select
+                                                value={getCurrentTierForTeam(team) || ''}
+                                                onChange={(e) => handleSelectChange(team, e)}
+                                            >
+                                                <option value="tier-0">Select</option>
+                                                <option value="tier-1">1-8</option>
+                                                <option value="tier-2">9-16</option>
+                                                <option value="tier-3">17-24</option>
+                                                <option value="tier-4">25-36</option>
+                                                <option value="remove">Remove</option>
+                                            </select>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <br />
+                            </div>
+                        ))}
                     </div>
                     <button className="reset-button" onClick={resetAll}>Reset All</button>
                 </div>
