@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>רשימת קניות</title>
+  <!-- טעינת React ו-ReactDOM -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel מאפשר לכתוב JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    h3 {
+      cursor: pointer;
+      color: #555;
+      background-color: #e0e0e0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 0;
+    }
+    .category-items {
+      background-color: #ffffff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    label {
+      margin-left: 10px;
+    }
+    input[type="text"], button {
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    function ShoppingList() {
+      const [categories, setCategories] = React.useState({
+        פירות: ["תפוחים", "בננות", "תפוזים"],
+        ירקות: ["גזר", "עגבניות", "מלפפונים"],
+        חלב: ["חלב", "גבינה", "יוגורט"]
+      });
+
+      const [selectedItems, setSelectedItems] = React.useState({});
+      const [phoneNumber, setPhoneNumber] = React.useState('');
+      const [expandedCategories, setExpandedCategories] = React.useState({
+        פירות: true,
+        ירקות: true,
+        חלב: true
+      });
+
+      const [itemNotes, setItemNotes] = React.useState({});
+
+      const handleCheckboxChange = (category, item) => {
+        setSelectedItems(prev => ({
+          ...prev,
+          [category]: {
+            ...(prev[category] || {}),
+            [item]: !prev[category]?.[item]
+          }
+        }));
+      };
+
+      const handleNoteChange = (category, item, note) => {
+        setItemNotes(prev => ({
+          ...prev,
+          [category]: {
+            ...(prev[category] || {}),
+            [item]: note
+          }
+        }));
+      };
+
+      const handlePhoneNumberChange = (e) => {
+        setPhoneNumber(e.target.value);
+      };
+
+      const handleSendToWhatsapp = () => {
+        const selected = Object.entries(selectedItems)
+          .map(([category, items]) => {
+            const selectedInCategory = Object.entries(items)
+              .filter(([item, checked]) => checked)
+              .map(([item]) => {
+                const note = itemNotes[category]?.[item];
+                return note ? `${item} (הערה: ${note})` : item;
+              })
+              .join(', ');
+            return selectedInCategory ? `${category}: ${selectedInCategory}` : '';
+          })
+          .filter(category => category)
+          .join('\n');
+
+        const whatsappMessage = `מוצרים שסומנו:\n${selected}`;
+        const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+        
+        window.open(whatsappLink, '_blank');
+      };
+
+      const toggleCategory = (category) => {
+        setExpandedCategories(prev => ({
+          ...prev,
+          [category]: !prev[category]
+        }));
+      };
+
+      return (
+        <div>
+          <h2>רשימת קניות</h2>
+          {Object.entries(categories).map(([category, items]) => (
+            <div key={category}>
+              <h3 onClick={() => toggleCategory(category)}>
+                {category} {expandedCategories[category] ? '▲' : '▼'}
+              </h3>
+              {expandedCategories[category] && (
+                <div className="category-items">
+                  {items.map(item => (
+                    <div key={item}>
+                      <input 
+                        type="checkbox" 
+                        id={`${category}-${item}`} 
+                        onChange={() => handleCheckboxChange(category, item)}
+                      />
+                      <label htmlFor={`${category}-${item}`}>{item}</label>
+                      <input 
+                        type="text" 
+                        placeholder="הוסף הערה (אופציונלי)"
+                        value={itemNotes[category]?.[item] || ''} 
+                        onChange={(e) => handleNoteChange(category, item, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <div>
+            <label>
+              מספר טלפון:
+              <input 
+                type="text" 
+                value={phoneNumber} 
+                onChange={handlePhoneNumberChange} 
+              />
+            </label>
+          </div>
+
+          <button onClick={handleSendToWhatsapp}>שלח לוואטסאפ</button>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<ShoppingList />, document.getElementById('root'));
+
+  </script>
+</body>
+</html>
+
