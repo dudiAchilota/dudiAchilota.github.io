@@ -48,6 +48,13 @@
             margin: 0;
         }
 
+        .Bottom-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            justify-items: center;
+        }
+
         .top-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -60,24 +67,11 @@
             box-sizing: border-box;
         }
 
-        .bottom-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 0;
-        }
-
-        .bottom-container div {
-            padding: 10px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-        }
 
         .team-list-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 0;
-            justify-items: center;
-            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* רווח בין המכולות */
         }
 
         .team-list {
@@ -144,6 +138,7 @@
         .color-tier-4 {
             color: red;
         }
+        
     </style>
 </head>
 
@@ -274,7 +269,7 @@
                             ))}
                         </div>
                     </div>
-                    <div className="bottom-container">
+                    <div className="top-container">
                         <div id="tier-3">
                             <h3>Places 17-24</h3>
                             {teamData['tier-3'].map((team, i) => (
@@ -288,12 +283,13 @@
                             ))}
                         </div>
                     </div>
+                  
                     <div className="team-list-container">
-                        {Object.keys(initialTeams).map(letter => (
-                            <div key={letter} className="team-list">
-                                <h3>{letter}</h3>
+                        <div className="Bottom-container">
+                            <div className="team-list">
+                                <h3>POT 1</h3>
                                 <ul>
-                                    {initialTeams[letter].map(team => (
+                                    {initialTeams['POT 1'].map(team => (
                                         <li key={team} className={getColorClass(team)}>
                                             <span>{team}</span>
                                             <select
@@ -310,16 +306,81 @@
                                         </li>
                                     ))}
                                 </ul>
-                                <br />
                             </div>
-                        ))}
+                            <div className="team-list">
+                                <h3>POT 2</h3>
+                                <ul>
+                                    {initialTeams['POT 2'].map(team => (
+                                        <li key={team} className={getColorClass(team)}>
+                                            <span>{team}</span>
+                                            <select
+                                                value={getCurrentTierForTeam(team) || ''}
+                                                onChange={(e) => handleSelectChange(team, e)}
+                                            >
+                                                <option value="tier-0">Select</option>
+                                                <option value="tier-1">1-8</option>
+                                                <option value="tier-2">9-16</option>
+                                                <option value="tier-3">17-24</option>
+                                                <option value="tier-4">25-36</option>
+                                                <option value="remove">Remove</option>
+                                            </select>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="Bottom-container">
+                            <div className="team-list">
+                                <h3>POT 3</h3>
+                                <ul>
+                                    {initialTeams['POT 3'].map(team => (
+                                        <li key={team} className={getColorClass(team)}>
+                                            <span>{team}</span>
+                                            <select
+                                                value={getCurrentTierForTeam(team) || ''}
+                                                onChange={(e) => handleSelectChange(team, e)}
+                                            >
+                                                <option value="tier-0">Select</option>
+                                                <option value="tier-1">1-8</option>
+                                                <option value="tier-2">9-16</option>
+                                                <option value="tier-3">17-24</option>
+                                                <option value="tier-4">25-36</option>
+                                                <option value="remove">Remove</option>
+                                            </select>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="team-list">
+                                <h3>POT 4</h3>
+                                <ul>
+                                    {initialTeams['POT 4'].map(team => (
+                                        <li key={team} className={getColorClass(team)}>
+                                            <span>{team}</span>
+                                            <select
+                                                value={getCurrentTierForTeam(team) || ''}
+                                                onChange={(e) => handleSelectChange(team, e)}
+                                            >
+                                                <option value="tier-0">Select</option>
+                                                <option value="tier-1">1-8</option>
+                                                <option value="tier-2">9-16</option>
+                                                <option value="tier-3">17-24</option>
+                                                <option value="tier-4">25-36</option>
+                                                <option value="remove">Remove</option>
+                                            </select>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                    <button className="reset-button" onClick={resetAll}>Reset All</button>
+                    <button onClick={resetAll} className="reset-button">Reset All</button>
                 </div>
             );
         }
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
     </script>
 </body>
 
