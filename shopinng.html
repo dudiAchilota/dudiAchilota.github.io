@@ -108,7 +108,7 @@
               .filter(([item, checked]) => checked)
               .map(([item]) => {
                 const note = itemNotes[category]?.[item];
-                return note ? `${item} (הערה: ${note})` : item;
+                return note ? `${item} ( ${note})` : item;
               })
               .join(', ');
             return selectedInCategory ? `${category}: ${selectedInCategory}` : '';
@@ -149,7 +149,7 @@
                       <label htmlFor={`${category}-${item}`}>{item}</label>
                       <input 
                         type="text" 
-                        placeholder="הוסף הערה (אופציונלי)"
+                        placeholder="הוסף הערה"
                         value={itemNotes[category]?.[item] || ''} 
                         onChange={(e) => handleNoteChange(category, item, e.target.value)}
                       />
@@ -164,7 +164,7 @@
             <label>
               מספר טלפון:
               <input 
-                type="text" 
+                type="phoneNumber" 
                 value={phoneNumber} 
                 onChange={handlePhoneNumberChange} 
               />
