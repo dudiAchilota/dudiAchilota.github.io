@@ -44,6 +44,7 @@
       font-size: 1em;
       border-radius: 5px;
       border: 1px solid #ddd;
+      width: 100%;
     }
     button {
       background-color: #4CAF50;
@@ -53,13 +54,24 @@
     button:hover {
       background-color: #45a049;
     }
+    .item-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .item-container label {
+      flex: 1;
+    }
+    .item-container input[type="text"] {
+      flex: 2;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-
     function ShoppingList() {
       const [categories, setCategories] = React.useState({
         פירות: ["תפוחים", "בננות", "תפוזים"],
@@ -68,7 +80,7 @@
       });
 
       const [selectedItems, setSelectedItems] = React.useState({});
-      const [phoneNumber, setPhoneNumber] = React.useState('');
+      const [phoneNumber, setPhoneNumber] = React.useState(localStorage.getItem('phoneNumber') || '');
       const [expandedCategories, setExpandedCategories] = React.useState({
         פירות: true,
         ירקות: true,
@@ -76,6 +88,7 @@
       });
 
       const [itemNotes, setItemNotes] = React.useState({});
+      const [generalNote, setGeneralNote] = React.useState('');
 
       const handleCheckboxChange = (category, item) => {
         setSelectedItems(prev => ({
@@ -98,7 +111,13 @@
       };
 
       const handlePhoneNumberChange = (e) => {
-        setPhoneNumber(e.target.value);
+        const newPhoneNumber = e.target.value;
+        setPhoneNumber(newPhoneNumber);
+        localStorage.setItem('phoneNumber', newPhoneNumber);
+      };
+
+      const handleGeneralNoteChange = (e) => {
+        setGeneralNote(e.target.value);
       };
 
       const handleSendToWhatsapp = () => {
@@ -108,7 +127,7 @@
               .filter(([item, checked]) => checked)
               .map(([item]) => {
                 const note = itemNotes[category]?.[item];
-                return note ? `${item} ( ${note})` : item;
+                return note ? `${item} (הערה: ${note})` : item;
               })
               .join(', ');
             return selectedInCategory ? `${category}: ${selectedInCategory}` : '';
@@ -116,7 +135,7 @@
           .filter(category => category)
           .join('\n');
 
-        const whatsappMessage = `מוצרים שסומנו:\n${selected}`;
+        const whatsappMessage = `רשימת קניות:\n${selected}\n\nהערה כללית: ${generalNote}`;
         const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
         
         window.open(whatsappLink, '_blank');
@@ -140,7 +159,7 @@
               {expandedCategories[category] && (
                 <div className="category-items">
                   {items.map(item => (
-                    <div key={item}>
+                    <div key={item} className="item-container">
                       <input 
                         type="checkbox" 
                         id={`${category}-${item}`} 
@@ -164,9 +183,20 @@
             <label>
               מספר טלפון:
               <input 
-                type="phoneNumber" 
+                type="number" 
                 value={phoneNumber} 
                 onChange={handlePhoneNumberChange} 
+              />
+            </label>
+          </div>
+
+          <div>
+            <label>
+              הערה כללית:
+              <input 
+                type="text" 
+                value={generalNote} 
+                onChange={handleGeneralNoteChange} 
               />
             </label>
           </div>
@@ -181,4 +211,5 @@
   </script>
 </body>
 </html>
+
 
