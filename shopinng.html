@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,9 +18,11 @@
       text-align: right;
       padding: 20px;
     }
+
     h2 {
       color: #333;
     }
+
     h3 {
       cursor: pointer;
       color: #555;
@@ -28,6 +31,7 @@
       border-radius: 5px;
       margin-bottom: 0;
     }
+
     .category-items {
       background-color: #ffffff;
       padding: 10px;
@@ -35,10 +39,13 @@
       border-radius: 5px;
       margin-bottom: 15px;
     }
+
     label {
       margin-left: 10px;
     }
-    input[type="text"], button {
+
+    input[type="text"],
+    button {
       padding: 10px;
       margin-top: 10px;
       font-size: 1em;
@@ -46,37 +53,53 @@
       border: 1px solid #ddd;
       width: 100%;
     }
+
     button {
       background-color: #4CAF50;
       color: white;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #45a049;
     }
+
     .item-container {
       display: flex;
       align-items: center;
       margin-bottom: 5px;
     }
+
     .item-container label {
       flex: 1;
     }
+
     .item-container input[type="text"] {
       flex: 2;
       margin-left: 10px;
     }
   </style>
 </head>
+
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
     function ShoppingList() {
       const [categories, setCategories] = React.useState({
-        פירות: ["תפוחים", "בננות", "תפוזים"],
-        ירקות: ["גזר", "עגבניות", "מלפפונים"],
-        חלב: ["חלב", "גבינה", "יוגורט"]
+        'פירות': ["תפוחים", "בננות", "תפוזים"],
+        'ירקות': ["גזר", "עגבנייה", "מלפפון", 'חציל', 'בצל', 'תפוח-אדמה', 'גמבה', 'כרוב', 'שום', 'סלק', 
+                  'חסה'],
+        'מוצרי חלב': ["חלב", 'גבינה לבנה', 'קוטג', 'יוגורט'],
+        'מאפים ומוצרי אפייה': ["לחם", "פיתות", "לחמניות", "קמח", "שמרים", "סוכר", "אבקת אפייה"],
+        'בשר ודגים': ["עוף", "בשר בקר", "פרגיות", "סלמון", "שניצל",],
+        'שימורים': ["טונה", "תירס", "שימורי אפונה", "רסק עגבניות", "שימורי חומוס"],
+        'קטניות': ["שעועית", "עדשים", "חומוס", "קינואה"],
+        'ממרחים ותיבול': ["טחינה", "דבש", "חרדל", "קטשופ", "מיונז", "שוקלד מריר",],
+        'משקאות': [ "יין", "מיץ תפוזים",'מים בטעמים', "מים", "סודה", "תה", "קפה"],
+        'חד-פעמי ושונות': ["כוסות", "צלחות", "נרות", "שמן זית להדלקה",
+                          "סבון כלים", "סמרטוטים" , "מגבונים לחים"],
+
       });
 
       const [selectedItems, setSelectedItems] = React.useState({});
@@ -137,7 +160,7 @@
 
         const whatsappMessage = `רשימת קניות:\n${selected}\n\nהערה כללית: ${generalNote}`;
         const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
-        
+
         window.open(whatsappLink, '_blank');
       };
 
@@ -160,16 +183,16 @@
                 <div className="category-items">
                   {items.map(item => (
                     <div key={item} className="item-container">
-                      <input 
-                        type="checkbox" 
-                        id={`${category}-${item}`} 
+                      <input
+                        type="checkbox"
+                        id={`${category}-${item}`}
                         onChange={() => handleCheckboxChange(category, item)}
                       />
                       <label htmlFor={`${category}-${item}`}>{item}</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="הוסף הערה"
-                        value={itemNotes[category]?.[item] || ''} 
+                        value={itemNotes[category]?.[item] || ''}
                         onChange={(e) => handleNoteChange(category, item, e.target.value)}
                       />
                     </div>
@@ -182,10 +205,10 @@
           <div>
             <label>
               מספר טלפון:
-              <input 
-                type="number" 
-                value={phoneNumber} 
-                onChange={handlePhoneNumberChange} 
+              <input
+                type="number"
+                value={phoneNumber}
+                onChange={handlePhoneNumberChange}
               />
             </label>
           </div>
@@ -193,10 +216,10 @@
           <div>
             <label>
               הערה כללית:
-              <input 
-                type="text" 
-                value={generalNote} 
-                onChange={handleGeneralNoteChange} 
+              <input
+                type="text"
+                value={generalNote}
+                onChange={handleGeneralNoteChange}
               />
             </label>
           </div>
@@ -210,6 +233,5 @@
 
   </script>
 </body>
+
 </html>
-
-
