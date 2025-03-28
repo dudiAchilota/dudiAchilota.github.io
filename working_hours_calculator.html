@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון שעות עבודה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>מחשבון שעות עבודה</h2>
+        <label>שעת כניסה:</label>
+        <input type="time" id="startTime">
+        <br>
+        <label>שעת יציאה:</label>
+        <input type="time" id="endTime">
+        <br>
+        <button onclick="calculateHours()">חשב</button>
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        function calculateHours() {
+            let start = document.getElementById('startTime').value;
+            let end = document.getElementById('endTime').value;
+            
+            if (!start || !end) {
+                document.getElementById('result').innerText = 'יש להזין את שתי השעות';
+                return;
+            }
+            
+            let startTime = new Date(`2024-01-01T${start}:00`);
+            let endTime = new Date(`2024-01-01T${end}:00`);
+            
+            if (endTime < startTime) {
+                endTime.setDate(endTime.getDate() + 1); // מאפשר חישוב נכון במעבר יום
+            }
+            
+            let diffMs = endTime - startTime;
+            let diffHours = diffMs / (1000 * 60 * 60);
+            
+            let roundedHours = Math.ceil(diffHours * 100) / 100; // עיגול כלפי מעלה לשתי ספרות אחרי הנקודה
+            
+            document.getElementById('result').innerText = `סה"כ שעות: ${roundedHours}`;
+        }
+    </script>
+</body>
+</html>
