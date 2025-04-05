@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Main Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="mb-4 text-center">Main Page</h1>
+    <div class="d-grid gap-3 col-12 col-md-6 mx-auto">
+      <a href="table.html" class="btn btn-primary">Go to Data Table</a>
+      <button class="btn btn-outline-secondary" onclick="clearData()">Clear Saved Data</button>
+    </div>
+  </div>
+
+  <script>
+    let theoryData = null;
+
+    async function loadExcelAndStore() {
+      try {
+        const response = await fetch('Theory.xlsx');
+        if (!response.ok) throw new Error('File not found');
+
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        localStorage.setItem('theoryData', JSON.stringify(jsonData));
+        theoryData = jsonData;
+
+        console.log('Excel loaded and saved:', theoryData);
+      } catch (error) {
+        console.error('Error loading Excel:', error.message);
+        theoryData = [{ message: 'Default data used - Excel not found' }];
+      }
+    }
+
+    function init() {
+      const savedData = localStorage.getItem('theoryData');
+      if (savedData) {
+        theoryData = JSON.parse(savedData);
+        console.log('Loaded from localStorage:', theoryData);
+      } else {
+        loadExcelAndStore();
+      }
+    }
+
+    function clearData() {
+      localStorage.removeItem('theoryData');
+      alert("Data cleared. Refresh the page to reload.");
+    }
+
+    init();
+  </script>
+</body>
+</html>

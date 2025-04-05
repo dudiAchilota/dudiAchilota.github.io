@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Table</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-white">
+  <div class="container py-4">
+    <h2 class="text-center mb-4">Theory Data Table</h2>
+
+    <div class="mb-3">
+      <input type="text" class="form-control" id="searchInput" placeholder="Search text..." oninput="filterTable()">
+    </div>
+
+    <div class="mb-3">
+      <select class="form-select" id="columnFilter" onchange="filterTable()">
+        <option value="">-- Filter by column --</option>
+      </select>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <a href="index.html" class="btn btn-secondary mt-4">Back to Main</a>
+  </div>
+
+  <script>
+    let originalData = [];
+    let visibleColumns = [];
+
+    function loadData() {
+      const saved = localStorage.getItem('theoryData');
+      if (!saved) {
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="5">No data found.</td></tr>';
+        return;
+      }
+
+      originalData = JSON.parse(saved);
+      renderTable(originalData);
+      populateFilterOptions();
+    }
+
+    function populateFilterOptions() {
+      const filterSelect = document.getElementById('columnFilter');
+      filterSelect.innerHTML = '<option value="">-- Filter by column --</option>';
+
+      const columns = Object.keys(originalData[0]);
+      visibleColumns = columns.slice(0, 4); // ניתן לבחור כמה עמודות להציג
+
+      columns.forEach(col => {
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        filterSelect.appendChild(option);
+      });
+    }
+
+    function renderTable(data) {
+      const thead = document.getElementById('tableHead');
+      const tbody = document.getElementById('tableBody');
+
+      thead.innerHTML = `<tr>${visibleColumns.map(col => `<th>${col}</th>`).join('')}</tr>`;
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          ${visibleColumns.map(col => `<td>${row[col] ?? ''}</td>`).join('')}
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() {
+      const text = document.getElementById('searchInput').value.toLowerCase();
+      const filterCol = document.getElementById('columnFilter').value;
+
+      const filtered = originalData.filter(row => {
+        if (filterCol) {
+          return (row[filterCol] ?? '').toString().toLowerCase().includes(text);
+        } else {
+          return Object.values(row).some(val =>
+            (val ?? '').toString().toLowerCase().includes(text)
+          );
+        }
+      });
+
+      renderTable(filtered);
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
