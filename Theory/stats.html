@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>סטטיסטיקת שאלות</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      direction: rtl;
+      padding: 20px;
+      font-family: 'Arial', sans-serif;
+    }
+    table {
+      width: 100%;
+    }
+    th {
+      cursor: pointer;
+    }
+    th:hover {
+      background-color: #f0f0f0;
+    }
+    th.sorted-asc::after {
+      content: " 🔼";
+    }
+    th.sorted-desc::after {
+      content: " 🔽";
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="mb-4">סטטיסטיקת שאלות</h2>
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th onclick="sortTable('מספר שאלה')">מספר שאלה</th>
+          <th onclick="sortTable('שאלה')">שאלה</th>
+          <th onclick="sortTable('קטגוריה')">קטגוריה</th>
+          <th onclick="sortTable('appeared_count')">כמות הופעות</th>
+          <th onclick="sortTable('correct_count')">כמות נכונות</th>
+        </tr>
+      </thead>
+      <tbody id="questionStatsTable">
+        <!-- תוכן -->
+      </tbody>
+    </table>
+    <a href="index.html" class="btn btn-outline-dark mt-3">חזרה לעמוד ראשי</a>
+  </div>
+
+  <script>
+    let tableData = [];
+    let currentSort = { column: 'appeared_count', direction: 'desc' };
+
+    function loadStats() {
+      const data = JSON.parse(localStorage.getItem('theoryData') || '[]');
+      tableData = data.map(row => ({
+        "מספר שאלה": row["מספר שאלה"],
+        "שאלה": row["שאלה"],
+        "קטגוריה": row["קטגוריה"],
+        "appeared_count": row["appeared_count"] || 0,
+        "correct_count": row["correct_count"] || 0
+      }));
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('questionStatsTable');
+      tbody.innerHTML = '';
+
+      const sorted = [...tableData].sort((a, b) => {
+        const col = currentSort.column;
+        let dir = currentSort.direction === 'asc' ? 1 : -1;
+        if (typeof a[col] === 'string') {
+          return a[col].localeCompare(b[col]) * dir;
+        } else {
+          return (a[col] - b[col]) * dir;
+        }
+      });
+
+      sorted.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row["מספר שאלה"]}</td>
+          <td>${row["שאלה"]}</td>
+          <td>${row["קטגוריה"]}</td>
+          <td>${row["appeared_count"]}</td>
+          <td>${row["correct_count"]}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateSortIcons();
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = 'desc';
+      }
+      renderTable();
+    }
+
+    function updateSortIcons() {
+      document.querySelectorAll('th').forEach(th => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (th.innerText.includes(currentSort.column)) {
+          th.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+      });
+    }
+
+    window.onload = loadStats;
+  </script>
+</body>
+</html>
