@@ -11,9 +11,22 @@
       text-align: right;
       font-family: "Arial", sans-serif;
     }
-    .option.correct { background-color: #d4edda; }
-    .option.wrong { background-color: #f8d7da; }
-    .option input { margin-left: 10px; }
+    .option {
+      padding: 8px;
+      border-radius: 8px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .option input[type="radio"]:checked {
+      background-color: #cce5ff;
+      border: 2px solid #3399ff;
+      border-radius: 8px;
+    }
+    .option:hover {
+      background-color: #f1f1f1;
+    }
+    .option.correct { background-color: #d4edda !important; }
+    .option.wrong { background-color: #f8d7da !important; }
     .container {
       max-width: 800px;
     }
@@ -92,12 +105,13 @@
         ? `<img src="${q.original["קישור לתמונה"]}" class="img-fluid my-3"/>`
         : "";
 
-      const optionsHtml = q.options.map(option => {
+      const optionsHtml = q.options.map((option, idx) => {
         const isChecked = q.selected === option ? "checked" : "";
+        const inputId = `option-${currentIndex}-${idx}`;
         return `
-          <div class="form-check option d-flex justify-content-end mb-2" dir="rtl">
-            <label class="form-check-label ms-2" style="flex: 1;">${option}</label>
-            <input class="form-check-input" type="radio" name="option" value="${option}" ${isChecked} onclick="selectOption('${option}')">
+          <div class="form-check option d-flex justify-content-end align-items-center mb-2" dir="rtl">
+            <input id="${inputId}" class="form-check-input me-2" type="radio" name="option" value="${option}" ${isChecked} onclick="selectOption('${option}')">
+            <label class="form-check-label" for="${inputId}" style="flex: 1;">${option}</label>
           </div>`;
       }).join("");
 
@@ -163,17 +177,18 @@
         ? `<img src="${q.original["קישור לתמונה"]}" class="img-fluid my-3"/>`
         : "";
 
-      const optionsHtml = q.options.map(option => {
-        let classes = "form-check option d-flex justify-content-end mb-2";
+      const optionsHtml = q.options.map((option, idx) => {
+        let classes = "form-check option d-flex justify-content-end align-items-center mb-2";
         if (option === q.correct) classes += " correct";
         if (q.selected === option && option !== q.correct) classes += " wrong";
 
         const checked = q.selected === option ? "checked" : "";
+        const inputId = `review-${currentIndex}-${idx}`;
 
         return `
           <div class="${classes}" dir="rtl">
-            <label class="form-check-label ms-2" style="flex: 1;">${option}</label>
-            <input class="form-check-input" type="radio" name="option" value="${option}" ${checked} disabled>
+            <input id="${inputId}" class="form-check-input me-2" type="radio" name="option" value="${option}" ${checked} disabled>
+            <label class="form-check-label" for="${inputId}" style="flex: 1;">${option}</label>
           </div>`;
       }).join("");
 
