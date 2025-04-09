@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תרגול תיאוריה</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background: #f8f8f8;
+      direction: rtl;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .question-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .answers label {
+      display: block;
+      background: #e0e0e0;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      padding-right: 2.5rem;
+    }
+    .answers input[type="radio"] {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .answers .correct {
+      background-color: #c8e6c9 !important;
+    }
+    .answers .wrong {
+      background-color: #ffcdd2 !important;
+    }
+    .btn {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      margin: 0.5rem auto;
+      display: block;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      background-color: #90caf9;
+    }
+    .image {
+      max-width: 100%;
+      display: block;
+      margin: 1rem auto;
+    }
+    .category-select {
+      margin-bottom: 1rem;
+    }
+    .checkbox {
+      display: block;
+      margin: 0.25rem 0;
+    }
+    .footer-btns {
+      text-align: center;
+      margin-top: 2rem;
+    }
+  </style>
+
+
+</head>
+<body>
+  <h1>תרגול תיאוריה</h1>
+
+  <div id="categorySelection" class="question-box">
+    <h2>בחר קטגוריות</h2>
+    <div id="categoryList"></div>
+    <button class="btn" onclick="startPractice()">התחל תרגול</button>
+  </div>
+
+  <div id="questionContainer" style="display:none">
+    <div class="question-box">
+      <h3 id="questionNumber"></h3>
+      <div id="questionText"></div>
+      <img id="questionImage" class="image" style="display:none" />
+      <div class="answers" id="answers"></div>
+    </div>
+    <button class="btn" id="showAnswerBtn" onclick="showAnswer()">הצג תשובה</button>
+    <button class="btn" onclick="nextQuestion()">הבא</button>
+    <div class="footer-btns">
+      <button class="btn" onclick="location.href='index.html'">חזרה למסך הראשי</button>
+    </div>
+  </div>
+
+  <script>
+    let allData = [];
+    let selectedCategories = [];
+    let currentQuestion = null;
+    let stats = {};
+
+    function loadData() {
+      const saved = localStorage.getItem('theoryData');
+      const catSaved = JSON.parse(localStorage.getItem('lastCategories') || '[]');
+      if (saved) {
+        allData = JSON.parse(saved);
+        renderCategories(catSaved);
+      } else {
+        alert("לא נמצא מידע על שאלות");
+      }
+    }
+
+    function renderCategories(last = []) {
+      const container = document.getElementById('categoryList');
+      const categories = [...new Set(allData.map(q => q["קטגוריה"]))];
+      container.innerHTML = categories.map(cat => `
+        <label class="checkbox">
+          <input type="checkbox" value="${cat}" ${last.includes(cat) ? 'checked' : ''}> ${cat}
+        </label>
+      `).join('');
+    }
+
+    function startPractice() {
+      const checkboxes = document.querySelectorAll('#categoryList input[type=checkbox]:checked');
+      selectedCategories = Array.from(checkboxes).map(cb => cb.value);
+      if (selectedCategories.length === 0) return alert("בחר לפחות קטגוריה אחת");
+      localStorage.setItem('lastCategories', JSON.stringify(selectedCategories));
+      document.getElementById('categorySelection').style.display = 'none';
+      document.getElementById('questionContainer').style.display = 'block';
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      const pool = allData.filter(q => selectedCategories.includes(q["קטגוריה"]));
+      currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+      displayQuestion();
+    }
+
+    function displayQuestion() {
+      const qNum = currentQuestion["מספר שאלה"];
+      document.getElementById('questionNumber').textContent = `שאלה מספר ${qNum}`;
+      document.getElementById('questionText').textContent = currentQuestion["שאלה"];
+      const img = document.getElementById('questionImage');
+      if (currentQuestion["קישור לתמונה"]) {
+        img.src = currentQuestion["קישור לתמונה"];
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+
+      const correct = currentQuestion["תשובה נכונה"].trim();
+      const options = ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"]
+        .map(k => currentQuestion[k]).sort(() => Math.random() - 0.5);
+
+      document.getElementById('answers').innerHTML = options.map((ans, i) => `
+        <label><input type="radio" name="answer" value="${ans}"> ${ans}</label>
+      `).join('');
+
+      document.getElementById('showAnswerBtn').disabled = false;
+    }
+
+    function showAnswer() {
+      const selected = document.querySelector('input[name=answer]:checked');
+      if (!selected) return alert("בחר תשובה");
+
+      const correct = currentQuestion["תשובה נכונה"].trim();
+      const radios = document.querySelectorAll('input[name=answer]');
+
+      radios.forEach(r => {
+        const lbl = r.parentElement;
+        if (r.value === correct) lbl.classList.add('correct');
+        if (r.checked && r.value !== correct) lbl.classList.add('wrong');
+      });
+
+      // עדכון סטטיסטיקות:
+      const id = currentQuestion["מספר שאלה"];
+      stats[id] = stats[id] || { appeared: 0, correct: 0 };
+      stats[id].appeared++;
+      if (selected.value === correct) stats[id].correct++;
+
+      saveStats();
+      document.getElementById('showAnswerBtn').disabled = true;
+    }
+
+    function saveStats() {
+      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      for (let key in stats) {
+        if (!currentStats[key]) currentStats[key] = { appeared: 0, correct: 0 };
+        currentStats[key].appeared += stats[key].appeared;
+        currentStats[key].correct += stats[key].correct;
+      }
+      localStorage.setItem('questionStats', JSON.stringify(currentStats));
+      stats = {}; // reset
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
