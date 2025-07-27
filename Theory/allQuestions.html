@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>כל השאלות </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background: #f8f8f8;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+    }
+
+    .question-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .answers label {
+      display: block;
+      background: #e0e0e0;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      padding-right: 2.5rem;
+    }
+
+    .answers input[type="radio"] {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .answers .correct {
+      background-color: #c8e6c9 !important;
+    }
+
+    .answers .wrong {
+      background-color: #ffcdd2 !important;
+    }
+
+    .btn {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      margin: 0.5rem auto;
+      display: block;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      background-color: #90caf9;
+    }
+
+    .image {
+      max-width: 100%;
+      display: block;
+      margin: 1rem auto;
+    }
+
+    .top-left {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: #eee;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .jump-box {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .jump-box input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100px;
+      margin-left: 0.5rem;
+    }
+
+    .footer-btns {
+      text-align: center;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>תרגול תיאוריה</h1>
+
+  <div class="jump-box">
+    עבור לשאלה:
+    <input type="number" id="jumpInput" min="1" />
+    <button class="btn" onclick="jumpToQuestion()">עבור</button>
+  </div>
+
+  <div id="questionContainer">
+    <div class="question-box">
+      <div id="statsBox" class="top-left"></div>
+      <h3 id="questionNumber"></h3>
+      <div id="questionText"></div>
+      <img id="questionImage" class="image" style="display:none" />
+      <div class="answers" id="answers"></div>
+    </div>
+    <button class="btn" id="showAnswerBtn" onclick="showAnswer()">הצג תשובה</button>
+    <button class="btn" onclick="nextQuestion()">הבא</button>
+    <div class="footer-btns">
+      <button class="btn" onclick="location.reload()">חזרה להתחלה</button>
+    </div>
+  </div>
+
+  <script>
+    let allData = [];
+    let currentIndex = 0;
+    let sortedData = [];
+    let stats = {};
+
+    function loadData() {
+      const saved = localStorage.getItem('theoryData');
+      if (!saved) {
+        alert("לא נמצא מידע על שאלות");
+        return;
+      }
+
+      allData = JSON.parse(saved);
+      sortedData = [...allData].sort((a, b) => {
+        return parseInt(a["מספר שאלה"]) - parseInt(b["מספר שאלה"]);
+      });
+
+      currentIndex = 0;
+      displayQuestion();
+    }
+
+    function displayQuestion() {
+      const q = sortedData[currentIndex];
+      const qNum = parseInt(q["מספר שאלה"]).toString(); // בלי אפסים מובילים
+
+      document.getElementById('questionNumber').textContent = `שאלה מספר ${qNum}`;
+      document.getElementById('questionText').textContent = q["שאלה"];
+
+      const img = document.getElementById('questionImage');
+      if (q["קישור לתמונה"]) {
+        img.src = q["קישור לתמונה"];
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+
+      const correct = q["תשובה נכונה"].trim();
+      const options = ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"]
+        .map(k => q[k]).sort(() => Math.random() - 0.5);
+
+      document.getElementById('answers').innerHTML = options.map(ans => `
+        <label><input type="radio" name="answer" value="${ans}"> ${ans}</label>
+      `).join('');
+
+      document.getElementById('showAnswerBtn').disabled = false;
+
+      updateStatsDisplay();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < sortedData.length - 1) {
+        currentIndex++;
+        displayQuestion();
+      } else {
+        alert("הגעת לסוף השאלות");
+      }
+    }
+
+    function jumpToQuestion() {
+      const target = document.getElementById('jumpInput').value;
+      const idx = sortedData.findIndex(q => parseInt(q["מספר שאלה"]) === parseInt(target));
+      if (idx === -1) {
+        alert(`שאלה מספר ${target} לא קיימת`);
+      } else {
+        currentIndex = idx;
+        displayQuestion();
+      }
+    }
+
+    function showAnswer() {
+      const selected = document.querySelector('input[name=answer]:checked');
+      if (!selected) return alert("בחר תשובה");
+
+      const q = sortedData[currentIndex];
+      const correct = q["תשובה נכונה"].trim();
+      const radios = document.querySelectorAll('input[name=answer]');
+
+      radios.forEach(r => {
+        const lbl = r.parentElement;
+
+       // if (r.value === correct) 
+       const clean = str => str.replace(/\s+/g, ' ').trim();
+          if (clean(r.value) === clean(correct)) 
+             lbl.classList.add('correct');
+        if (r.checked && r.value !== correct) lbl.classList.add('wrong');
+      });
+
+      // עדכון סטטיסטיקות
+      const id = q["מספר שאלה"];
+      stats[id] = stats[id] || { appeared: 0, correct: 0 };
+      stats[id].appeared++;
+      if (selected.value === correct) stats[id].correct++;
+
+      saveStats();
+      updateStatsDisplay();
+
+      document.getElementById('showAnswerBtn').disabled = true;
+    }
+
+    function saveStats() {
+      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      for (let key in stats) {
+        if (!currentStats[key]) currentStats[key] = { appeared: 0, correct: 0 };
+        currentStats[key].appeared += stats[key].appeared;
+        currentStats[key].correct += stats[key].correct;
+      }
+      localStorage.setItem('questionStats', JSON.stringify(currentStats));
+      stats = {};
+    }
+
+    function updateStatsDisplay() {
+      const q = sortedData[currentIndex];
+      const id = q["מספר שאלה"];
+      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const stat = currentStats[id] || { appeared: 0, correct: 0 };
+      document.getElementById('statsBox').textContent = `${stat.correct}/${stat.appeared}`;
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
