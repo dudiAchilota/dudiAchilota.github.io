@@ -166,7 +166,7 @@
         .map(k => q[k]).sort(() => Math.random() - 0.5);
 
       document.getElementById('answers').innerHTML = options.map(ans => `
-        <label><input type="radio" name="answer" value="${ans}"> ${ans}</label>
+        <label><input type="radio" name="answer" value='${ans}'> ${ans}</label>
       `).join('');
 
       document.getElementById('showAnswerBtn').disabled = false;
