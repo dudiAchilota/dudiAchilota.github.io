@@ -122,7 +122,7 @@
       const categories = [...new Set(allData.map(q => q["קטגוריה"]))];
       container.innerHTML = categories.map(cat => `
         <label class="checkbox">
-          <input type="checkbox" value="${cat}" ${last.includes(cat) ? 'checked' : ''}> ${cat}
+          <input type="checkbox" value='${cat}' ${last.includes(cat) ? 'checked' : ''}> ${cat}
         </label>
       `).join('');
     }
