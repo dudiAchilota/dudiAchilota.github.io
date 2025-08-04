@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,16 +12,21 @@
       background: #f8f8f8;
       direction: rtl;
     }
-    h1, h2, h3 {
+
+    h1,
+    h2,
+    h3 {
       text-align: center;
     }
+
     .question-box {
       background: white;
       padding: 1rem;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       margin-bottom: 1rem;
     }
+
     .answers label {
       display: block;
       background: #e0e0e0;
@@ -31,18 +37,22 @@
       position: relative;
       padding-right: 2.5rem;
     }
+
     .answers input[type="radio"] {
       position: absolute;
       right: 1rem;
       top: 50%;
       transform: translateY(-50%);
     }
+
     .answers .correct {
       background-color: #c8e6c9 !important;
     }
+
     .answers .wrong {
       background-color: #ffcdd2 !important;
     }
+
     .btn {
       background-color: #2196F3;
       color: white;
@@ -54,21 +64,26 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     .btn:disabled {
       background-color: #90caf9;
     }
+
     .image {
       max-width: 100%;
       display: block;
       margin: 1rem auto;
     }
+
     .category-select {
       margin-bottom: 1rem;
     }
+
     .checkbox {
       display: block;
       margin: 0.25rem 0;
     }
+
     .footer-btns {
       text-align: center;
       margin-top: 2rem;
@@ -77,6 +92,7 @@
 
 
 </head>
+
 <body>
   <h1>תרגול תיאוריה</h1>
 
@@ -88,7 +104,6 @@
 
   <div id="questionContainer" style="display:none">
     <div class="question-box">
-       <div id="statsBox" class="top-left"></div>
       <h3 id="questionNumber"></h3>
       <div id="questionText"></div>
       <img id="questionImage" class="image" style="display:none" />
@@ -161,7 +176,7 @@
         .map(k => currentQuestion[k]).sort(() => Math.random() - 0.5);
 
       document.getElementById('answers').innerHTML = options.map((ans, i) => `
-        <label><input type="radio" name="answer" value=,'{ans}'> ${ans}</label>
+        <label><input type="radio" name="answer" value='${ans}'> ${ans}</label>
       `).join('');
 
       document.getElementById('showAnswerBtn').disabled = false;
@@ -201,14 +216,8 @@
       stats = {}; // reset
     }
 
-    function updateStatsDisplay() {
-      const q = sortedData[currentIndex];
-      const id = q["מספר שאלה"];
-      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
-      const stat = currentStats[id] || { appeared: 0, correct: 0 };
-      document.getElementById('statsBox').textContent = `${stat.correct}/${stat.appeared}`;
-    }
     window.onload = loadData;
   </script>
 </body>
+
 </html>
