@@ -88,6 +88,7 @@
 
   <div id="questionContainer" style="display:none">
     <div class="question-box">
+       <div id="statsBox" class="top-left"></div>
       <h3 id="questionNumber"></h3>
       <div id="questionText"></div>
       <img id="questionImage" class="image" style="display:none" />
@@ -160,7 +161,7 @@
         .map(k => currentQuestion[k]).sort(() => Math.random() - 0.5);
 
       document.getElementById('answers').innerHTML = options.map((ans, i) => `
-        <label><input type="radio" name="answer" value="${ans}"> ${ans}</label>
+        <label><input type="radio" name="answer" value=,'{ans}'> ${ans}</label>
       `).join('');
 
       document.getElementById('showAnswerBtn').disabled = false;
@@ -200,6 +201,13 @@
       stats = {}; // reset
     }
 
+    function updateStatsDisplay() {
+      const q = sortedData[currentIndex];
+      const id = q["מספר שאלה"];
+      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const stat = currentStats[id] || { appeared: 0, correct: 0 };
+      document.getElementById('statsBox').textContent = `${stat.correct}/${stat.appeared}`;
+    }
     window.onload = loadData;
   </script>
 </body>
