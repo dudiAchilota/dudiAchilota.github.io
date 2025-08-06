@@ -2,8 +2,8 @@
 <html lang="he" dir="rtl">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>תרגול תיאוריה</title>
   <style>
     body {
@@ -13,9 +13,7 @@
       direction: rtl;
     }
 
-    h1,
-    h2,
-    h3 {
+    h1, h2, h3 {
       text-align: center;
     }
 
@@ -43,6 +41,10 @@
       right: 1rem;
       top: 50%;
       transform: translateY(-50%);
+    }
+
+    .answers input[type="radio"]:checked + span {
+      font-weight: bold;
     }
 
     .answers .correct {
@@ -88,9 +90,30 @@
       text-align: center;
       margin-top: 2rem;
     }
+
+    .question-stats {
+      text-align: left;
+      font-weight: bold;
+      padding: 0.5rem;
+    }
+
+    .filter-box {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #ffffff;
+      border-radius: 8px;
+    }
+
+    .filter-box label {
+      display: inline-block;
+      margin-left: 1rem;
+    }
+
+    .filter-box input[type="number"] {
+      width: 60px;
+      margin-right: 5px;
+    }
   </style>
-
-
 </head>
 
 <body>
@@ -99,11 +122,22 @@
   <div id="categorySelection" class="question-box">
     <h2>בחר קטגוריות</h2>
     <div id="categoryList"></div>
+
+    <div class="filter-box">
+      <h3>סינון לפי סטטיסטיקה</h3>
+      <label><input type="checkbox" id="filterAppeared"> שאלות שנענו לפחות</label>
+      <input type="number" id="minAppeared" value="1" min="1">
+      <br />
+      <label><input type="checkbox" id="filterCorrect"> שאלות עם תשובות נכונות לפחות</label>
+      <input type="number" id="minCorrect" value="1" min="1">
+    </div>
+
     <button class="btn" onclick="startPractice()">התחל תרגול</button>
   </div>
 
   <div id="questionContainer" style="display:none">
     <div class="question-box">
+      <div class="question-stats" id="questionStatsDisplay"></div>
       <h3 id="questionNumber"></h3>
       <div id="questionText"></div>
       <img id="questionImage" class="image" style="display:none" />
@@ -129,7 +163,7 @@
         allData = JSON.parse(saved);
         renderCategories(catSaved);
       } else {
-        alert("לא נמצא מידע על שאלות");
+        document.body.innerHTML = '<p style="text-align:center;color:red;">לא נטען מידע על שאלות. נא לוודא שהקובץ נטען קודם.</p>';
       }
     }
 
@@ -154,7 +188,33 @@
     }
 
     function nextQuestion() {
-      const pool = allData.filter(q => selectedCategories.includes(q["קטגוריה"]));
+      const statsData = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const filterAppeared = document.getElementById('filterAppeared')?.checked;
+      const filterCorrect = document.getElementById('filterCorrect')?.checked;
+      const minAppeared = parseInt(document.getElementById('minAppeared')?.value || '1');
+      const minCorrect = parseInt(document.getElementById('minCorrect')?.value || '1');
+
+      let pool = allData.filter(q => selectedCategories.includes(q["קטגוריה"]));
+
+      if (filterAppeared) {
+        pool = pool.filter(q =>
+          statsData[q["מספר שאלה"]] &&
+          statsData[q["מספר שאלה"]].appeared >= minAppeared
+        );
+      }
+
+      if (filterCorrect) {
+        pool = pool.filter(q =>
+          statsData[q["מספר שאלה"]] &&
+          statsData[q["מספר שאלה"]].correct >= minCorrect
+        );
+      }
+
+      if (pool.length === 0) {
+        alert("לא נמצאו שאלות תואמות לסינון");
+        return;
+      }
+
       currentQuestion = pool[Math.floor(Math.random() * pool.length)];
       displayQuestion();
     }
@@ -163,6 +223,7 @@
       const qNum = currentQuestion["מספר שאלה"];
       document.getElementById('questionNumber').textContent = `שאלה מספר ${qNum}`;
       document.getElementById('questionText').textContent = currentQuestion["שאלה"];
+
       const img = document.getElementById('questionImage');
       if (currentQuestion["קישור לתמונה"]) {
         img.src = currentQuestion["קישור לתמונה"];
@@ -175,11 +236,16 @@
       const options = ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"]
         .map(k => currentQuestion[k]).sort(() => Math.random() - 0.5);
 
-      document.getElementById('answers').innerHTML = options.map((ans, i) => `
-        <label><input type="radio" name="answer" value='${ans}'> ${ans}</label>
+      document.getElementById('answers').innerHTML = options.map(ans => `
+        <label><input type="radio" name="answer" value='${ans}'><span> ${ans}</span></label>
       `).join('');
 
       document.getElementById('showAnswerBtn').disabled = false;
+
+      // הצגת סטטיסטיקה לכל שאלה
+      const qId = currentQuestion["מספר שאלה"];
+      const stat = JSON.parse(localStorage.getItem('questionStats') || '{}')[qId] || { appeared: 0, correct: 0 };
+      document.getElementById('questionStatsDisplay').textContent = `${stat.correct}/${stat.appeared}`;
     }
 
     function showAnswer() {
@@ -195,7 +261,6 @@
         if (r.checked && r.value !== correct) lbl.classList.add('wrong');
       });
 
-      // עדכון סטטיסטיקות:
       const id = currentQuestion["מספר שאלה"];
       stats[id] = stats[id] || { appeared: 0, correct: 0 };
       stats[id].appeared++;
@@ -213,7 +278,7 @@
         currentStats[key].correct += stats[key].correct;
       }
       localStorage.setItem('questionStats', JSON.stringify(currentStats));
-      stats = {}; // reset
+      stats = {};
     }
 
     window.onload = loadData;
