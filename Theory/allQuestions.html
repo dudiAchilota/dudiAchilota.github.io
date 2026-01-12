@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>כל השאלות </title>
+  <title>תרגול תיאוריה - כולל סיווג רכבים</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,7 +56,7 @@
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
       margin: 0.5rem auto;
-      display: block;
+      display: block; /* ברירת מחדל - תופס שורה שלמה */
       border-radius: 8px;
       cursor: pointer;
     }
@@ -69,6 +69,8 @@
       max-width: 100%;
       display: block;
       margin: 1rem auto;
+      max-height: 300px;
+      object-fit: contain;
     }
 
     .top-left {
@@ -79,23 +81,86 @@
       padding: 0.4rem 0.8rem;
       border-radius: 6px;
       font-weight: bold;
+      font-size: 0.9rem;
     }
 
+    /* --- תיקון למיקום בשורה אחת --- */
     .jump-box {
-      text-align: center;
+      display: flex; /* משתמשים בפלקס כדי ליישר הכל בשורה */
+      justify-content: center;
+      align-items: center;
+      gap: 10px; /* רווח בין האלמנטים */
       margin-bottom: 1rem;
     }
 
     .jump-box input {
       padding: 0.5rem;
       font-size: 1rem;
-      width: 100px;
-      margin-left: 0.5rem;
+      width: 80px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
+
+    /* דריסת הגדרות הכפתור הרגיל כדי שיתאים לשורה */
+    .jump-box .btn {
+      display: inline-block; 
+      margin: 0; 
+      padding: 0.5rem 1rem;
+    }
+    /* ------------------------------ */
 
     .footer-btns {
       text-align: center;
       margin-top: 2rem;
+    }
+
+    /* עיצוב בחירת סוג רכב */
+    .vehicle-types {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 15px 0;
+      text-align: center;
+      border: 1px solid #bbdefb;
+    }
+    
+    .vehicle-types strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #1565c0;
+    }
+
+    .vehicle-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .vehicle-options label {
+      cursor: pointer;
+      background: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .vehicle-options label:hover {
+      background: #f1f1f1;
+    }
+
+    .vehicle-options input:checked + span {
+      font-weight: bold;
+      color: #2196F3;
+    }
+    
+    .vehicle-options input:checked {
+        accent-color: #2196F3;
     }
   </style>
 </head>
@@ -104,8 +169,8 @@
   <h1>תרגול תיאוריה</h1>
 
   <div class="jump-box">
-    עבור לשאלה:
-    <input type="number" id="jumpInput" min="1" />
+    <span>עבור לשאלה:</span>
+    <input type="number" id="jumpInput" min="1" placeholder="#" />
     <button class="btn" onclick="jumpToQuestion()">עבור</button>
   </div>
 
@@ -114,13 +179,28 @@
       <div id="statsBox" class="top-left"></div>
       <h3 id="questionNumber"></h3>
       <div id="questionText"></div>
+      
       <img id="questionImage" class="image" style="display:none" />
+
+      <div class="vehicle-types">
+        <strong>לאיזה רכב השאלה מתאימה?</strong>
+        <div class="vehicle-options">
+          <label><input type="radio" name="vehicleType" value="all" onchange="saveVehicleType(this.value)"> <span>כל הרכבים</span></label>
+          <label><input type="radio" name="vehicleType" value="motorcycle" onchange="saveVehicleType(this.value)"> <span>אופנוע (A)</span></label>
+          <label><input type="radio" name="vehicleType" value="private" onchange="saveVehicleType(this.value)"> <span>פרטי (B)</span></label>
+          <label><input type="radio" name="vehicleType" value="truck" onchange="saveVehicleType(this.value)"> <span>משא (C)</span></label>
+          <label><input type="radio" name="vehicleType" value="public" onchange="saveVehicleType(this.value)"> <span>ציבורי (D)</span></label>
+        </div>
+      </div>
+
       <div class="answers" id="answers"></div>
     </div>
     <button class="btn" id="showAnswerBtn" onclick="showAnswer()">הצג תשובה</button>
     <button class="btn" onclick="nextQuestion()">הבא</button>
+    
     <div class="footer-btns">
       <button class="btn" onclick="location.reload()">חזרה להתחלה</button>
+      <button class="btn" style="background-color: #607d8b; margin-top:10px;" onclick="exportVehicleData()">הורד נתוני סיווג (JSON)</button>
     </div>
   </div>
 
@@ -129,18 +209,25 @@
     let currentIndex = 0;
     let sortedData = [];
     let stats = {};
+    let vehicleTags = {}; // אובייקט לשמירת סיווגים
 
     function loadData() {
+      // טעינת שאלות
       const saved = localStorage.getItem('theoryData');
       if (!saved) {
-        alert("לא נמצא מידע על שאלות");
+        alert("לא נמצא מידע על שאלות ב-LocalStorage (theoryData).");
         return;
       }
-
       allData = JSON.parse(saved);
       sortedData = [...allData].sort((a, b) => {
         return parseInt(a["מספר שאלה"]) - parseInt(b["מספר שאלה"]);
       });
+
+      // טעינת סיווגי רכב שנשמרו בעבר
+      const savedTags = localStorage.getItem('vehicleTags');
+      if (savedTags) {
+        vehicleTags = JSON.parse(savedTags);
+      }
 
       currentIndex = 0;
       displayQuestion();
@@ -148,11 +235,13 @@
 
     function displayQuestion() {
       const q = sortedData[currentIndex];
-      const qNum = parseInt(q["מספר שאלה"]).toString(); // בלי אפסים מובילים
+      const qNum = parseInt(q["מספר שאלה"]).toString(); 
+      const qId = q["מספר שאלה"]; 
 
       document.getElementById('questionNumber').textContent = `שאלה מספר ${qNum}`;
       document.getElementById('questionText').textContent = q["שאלה"];
 
+      // תמונה
       const img = document.getElementById('questionImage');
       if (q["קישור לתמונה"]) {
         img.src = q["קישור לתמונה"];
@@ -161,7 +250,20 @@
         img.style.display = 'none';
       }
 
-      const correct = q["תשובה נכונה"].trim();
+      // --- שחזור סוג הרכב השמור ---
+      // איפוס הבחירה
+      const radioButtons = document.getElementsByName('vehicleType');
+      for(let radio of radioButtons) radio.checked = false;
+
+      // אם יש מידע שמור, סמן אותו
+      if (vehicleTags[qId]) {
+        const savedValue = vehicleTags[qId];
+        const matchingRadio = document.querySelector(`input[name="vehicleType"][value="${savedValue}"]`);
+        if (matchingRadio) matchingRadio.checked = true;
+      }
+      // ----------------------------
+
+      // תשובות
       const options = ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"]
         .map(k => q[k]).sort(() => Math.random() - 0.5);
 
@@ -170,8 +272,15 @@
       `).join('');
 
       document.getElementById('showAnswerBtn').disabled = false;
-
       updateStatsDisplay();
+    }
+
+    function saveVehicleType(value) {
+      const q = sortedData[currentIndex];
+      const id = q["מספר שאלה"];
+      
+      vehicleTags[id] = value;
+      localStorage.setItem('vehicleTags', JSON.stringify(vehicleTags));
     }
 
     function nextQuestion() {
@@ -204,12 +313,10 @@
 
       radios.forEach(r => {
         const lbl = r.parentElement;
-
-       // if (r.value === correct) 
-       const clean = str => str.replace(/\s+/g, ' ').trim();
-          if (clean(r.value) === clean(correct)) 
-             lbl.classList.add('correct');
-        if (r.checked && r.value !== correct) lbl.classList.add('wrong');
+        const clean = str => str.replace(/\s+/g, ' ').trim();
+        if (clean(r.value) === clean(correct)) 
+           lbl.classList.add('correct');
+        if (r.checked && clean(r.value) !== clean(correct)) lbl.classList.add('wrong');
       });
 
       // עדכון סטטיסטיקות
@@ -240,7 +347,17 @@
       const id = q["מספר שאלה"];
       const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
       const stat = currentStats[id] || { appeared: 0, correct: 0 };
-      document.getElementById('statsBox').textContent = `${stat.correct}/${stat.appeared}`;
+      document.getElementById('statsBox').textContent = `הצלחות: ${stat.correct}/${stat.appeared}`;
+    }
+
+    function exportVehicleData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vehicleTags));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "vehicle_tags.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
 
     window.onload = loadData;
