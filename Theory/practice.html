@@ -113,10 +113,88 @@
       width: 60px;
       margin-right: 5px;
     }
+
+    /* עיצוב מדד ההתקדמות (העיגול) */
+    #scoreCircleContainer {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 70px;
+      height: 70px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: none;
+    }
+
+    .circular-chart {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .circle-bg {
+      fill: none;
+      stroke: #eee;
+      stroke-width: 2.5;
+    }
+
+    .circle {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      transition: stroke-dasharray 0.6s ease, stroke 0.3s ease;
+    }
+
+    .circle.gray { stroke: #9e9e9e; }
+    .circle.green { stroke: #4caf50; }
+
+    .score-text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      line-height: 1.1;
+      width: 100%;
+    }
+
+    .score-fraction {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .score-percent {
+      display: block;
+      font-size: 10px;
+      color: #666;
+    }
   </style>
 </head>
 
 <body>
+  <div id="scoreCircleContainer">
+    <svg viewBox="0 0 36 36" class="circular-chart">
+      <path class="circle-bg"
+        d="M18 2.0845
+           a 15.9155 15.9155 0 0 1 0 31.831
+           a 15.9155 15.9155 0 0 1 0 -31.831" />
+      <path id="progressPath" class="circle gray"
+        stroke-dasharray="0, 100"
+        d="M18 2.0845
+           a 15.9155 15.9155 0 0 1 0 31.831
+           a 15.9155 15.9155 0 0 1 0 -31.831" />
+    </svg>
+    <div class="score-text-container">
+      <span id="scoreFraction" class="score-fraction">0/0</span>
+      <span id="scorePercent" class="score-percent">0%</span>
+    </div>
+  </div>
+
   <h1>תרגול תיאוריה</h1>
 
   <div id="categorySelection" class="question-box">
@@ -158,6 +236,9 @@
     let currentQuestion = null;
     let stats = {};
 
+    let sessionTotal = 0;
+    let sessionCorrect = 0;
+
     function loadData() {
       const saved = localStorage.getItem('theoryData');
       const catSaved = JSON.parse(localStorage.getItem('lastCategories') || '[]');
@@ -183,10 +264,36 @@
       const checkboxes = document.querySelectorAll('#categoryList input[type=checkbox]:checked');
       selectedCategories = Array.from(checkboxes).map(cb => cb.value);
       if (selectedCategories.length === 0) return alert("בחר לפחות קטגוריה אחת");
+      
       localStorage.setItem('lastCategories', JSON.stringify(selectedCategories));
+      
+      sessionTotal = 0;
+      sessionCorrect = 0;
+      updateScoreUI();
+      document.getElementById('scoreCircleContainer').style.display = 'block';
+
       document.getElementById('categorySelection').style.display = 'none';
       document.getElementById('questionContainer').style.display = 'block';
       nextQuestion();
+    }
+
+    function updateScoreUI() {
+      document.getElementById('scoreFraction').textContent = `${sessionCorrect}/${sessionTotal}`;
+      let percent = 0;
+      if (sessionTotal > 0) {
+        percent = Math.round((sessionCorrect / sessionTotal) * 100);
+      }
+      document.getElementById('scorePercent').textContent = `${percent}%`;
+      const circlePath = document.getElementById('progressPath');
+      circlePath.setAttribute("stroke-dasharray", `${percent}, 100`);
+      
+      if (percent > 86) {
+        circlePath.classList.remove('gray');
+        circlePath.classList.add('green');
+      } else {
+        circlePath.classList.remove('green');
+        circlePath.classList.add('gray');
+      }
     }
 
     function nextQuestion() {
@@ -225,7 +332,9 @@
     }
 
     function displayQuestion() {
-      const qNum = currentQuestion["מספר שאלה"];
+      // כאן התיקון: הסרת אפסים מובילים על ידי parseInt
+      const qNum = parseInt(currentQuestion["מספר שאלה"]);
+      
       document.getElementById('questionNumber').textContent = `שאלה מספר ${qNum}`;
       document.getElementById('questionText').textContent = currentQuestion["שאלה"];
 
@@ -246,7 +355,6 @@
 
       document.getElementById('showAnswerBtn').disabled = false;
 
-      // הצגת סטטיסטיקה לכל שאלה
       const qId = currentQuestion["מספר שאלה"];
       const stat = JSON.parse(localStorage.getItem('questionStats') || '{}')[qId] || { appeared: 0, correct: 0 };
       document.getElementById('questionStatsDisplay').textContent = `${stat.correct}/${stat.appeared}`;
@@ -258,12 +366,18 @@
 
       const correct = currentQuestion["תשובה נכונה"].trim();
       const radios = document.querySelectorAll('input[name=answer]');
+      let isCorrect = false;
 
       radios.forEach(r => {
         const lbl = r.parentElement;
         if (r.value === correct) lbl.classList.add('correct');
         if (r.checked && r.value !== correct) lbl.classList.add('wrong');
+        if (r.checked && r.value === correct) isCorrect = true;
       });
+
+      sessionTotal++;
+      if (isCorrect) sessionCorrect++;
+      updateScoreUI();
 
       const id = currentQuestion["מספר שאלה"];
       stats[id] = stats[id] || { appeared: 0, correct: 0 };
