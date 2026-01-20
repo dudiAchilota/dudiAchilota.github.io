@@ -9,7 +9,6 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 0.5rem;
-      /* רווח למטה כדי שהכפתורים הקבועים לא יסתירו את התוכן */
       padding-bottom: 80px; 
       background: #f4f6f8;
       direction: rtl;
@@ -38,7 +37,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* --- שורה עליונה מאוחדת --- */
     .header-row {
       display: flex;
       justify-content: space-between;
@@ -66,11 +64,10 @@
     }
 
     .fav-btn.active {
-      color: #f1c40f; /* צהוב זהב */
+      color: #f1c40f; 
       transform: scale(1.1);
     }
 
-    /* --- תשובות --- */
     .answers label {
       display: flex;
       align-items: center;
@@ -112,24 +109,22 @@
         color: #721c24;
     }
 
-    /* --- כפתורים קבועים למטה --- */
     .action-buttons {
       position: fixed;
       bottom: 0;
       left: 50%;
-      transform: translateX(-50%); /* מירכוז */
+      transform: translateX(-50%);
       width: 100%;
-      max-width: 600px; /* שלא יחרגו ברוחב במחשב */
+      max-width: 600px;
       background: white;
       padding: 10px 15px;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       z-index: 999;
       display: flex;
-      gap: 15px; /* רווח בין הכפתורים */
+      gap: 15px;
       box-sizing: border-box;
     }
 
-    /* עיצוב כפתורים כללי */
     .btn {
       background-color: #2196F3;
       color: white;
@@ -145,38 +140,27 @@
     
     .btn:active { opacity: 0.9; }
 
-    /* כפתורים קטנים יותר לפס התחתון */
     .action-buttons .btn {
-      padding: 8px 0; /* פחות ריפוד */
-      font-size: 0.9rem; /* פונט קטן יותר */
-      border-radius: 20px; /* פינות עגולות יותר */
-      flex: 1; /* חלוקה שווה ברוחב */
+      padding: 8px 0;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      flex: 1;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     
-    .btn-secondary {
-      background-color: #95a5a6; 
-    }
-    
-    .btn-check {
-        background-color: #2ecc71;
-    }
-
-    .btn:disabled {
-      background-color: #bdc3c7;
-      cursor: not-allowed;
-    }
+    .btn-secondary { background-color: #95a5a6; }
+    .btn-check { background-color: #2ecc71; }
+    .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 
     .image {
       max-width: 100%;
-      max-height: 250px; /* הגבלת גובה תמונה כדי שלא תתפוס את כל המסך */
+      max-height: 250px;
       object-fit: contain;
       display: block;
       margin: 0.5rem auto;
       border-radius: 8px;
     }
 
-    /* --- מסך סינון --- */
     .filter-box {
       margin: 1rem 0;
       padding: 1rem;
@@ -201,16 +185,75 @@
       text-align: center;
     }
     
-    .fav-filter-row {
+    /* --- תיקון העיצוב: מסגרת רק על המועדפים --- */
+    .top-filters-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; 
+        /* הסרנו את הרקע והבורדר מהמיכל הראשי */
+        background-color: transparent;
+        border: none;
+        padding: 0;
+        margin-bottom: 15px;
+        flex-wrap: wrap; 
+        gap: 10px;
+    }
+
+    .fav-section {
+        /* העברנו את העיצוב הצהוב לכאן */
         background-color: #fff9db;
+        border: 1px solid #f1c40f;
         padding: 10px;
         border-radius: 6px;
-        margin-bottom: 15px;
-        border: 1px solid #f1c40f;
+        
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        /* כדי שלא יתפוס את כל הרוחב אם לא צריך */
+        flex: 0 1 auto; 
+    }
+
+    .vehicle-filter-section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; 
+        flex: 1;
+        /* ללא רקע */
+    }
+
+    .vehicle-filter-title {
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #7f8c8d;
+        margin-bottom: 4px;
+    }
+
+    .vehicle-filter-options {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .v-filter-btn {
+        background: #fff;
+        border: 1px solid #ccc;
+        font-size: 0.75rem;
+        padding: 3px 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+    }
+
+    .v-filter-btn.active {
+        background-color: #2196F3;
+        color: white;
+        border-color: #1976D2;
         font-weight: bold;
     }
 
-    /* --- סיווג רכב (החדש) --- */
+    /* --- סיווג רכב (בתחתית השאלה) --- */
     .vehicle-types {
       margin-top: 1.5rem;
       padding-top: 1rem;
@@ -253,12 +296,10 @@
       margin-left: 6px;
     }
 
-    /* הדגשה כשהאופציה נבחרת */
     .vehicle-options input:checked + span {
       font-weight: bold;
       color: #2196F3;
     }
-
 
     /* --- עיגול ציון --- */
     #scoreCircleContainer {
@@ -311,12 +352,23 @@
     <h2>הגדרות תרגול</h2>
     
     <div class="filter-box">
-        <label class="fav-filter-row">
-            <input type="checkbox" id="onlyFavorites"> 
-            רק שאלות מועדפות (★)
-        </label>
+        <div class="top-filters-container">
+            <label class="fav-section">
+                <input type="checkbox" id="onlyFavorites"> 
+                רק שאלות מועדפות (★)
+            </label>
 
-        <h3>סינון מתקדם</h3>
+            <div class="vehicle-filter-section">
+                <div class="vehicle-filter-title">סנן לפי סוג רכב:</div>
+                <div class="vehicle-filter-options">
+                    <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'motorcycle')">אופנוע</div>
+                    <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'private')">פרטי</div>
+                    <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'truck')">משא</div>
+                    <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'public')">ציבורי</div>
+                </div>
+            </div>
+        </div>
+
         <div class="filter-row">
             <label><input type="checkbox" id="filterAppeared"> הופיעו: </label>
             <input type="number" id="minAppeared" value="0" min="0"> עד 
@@ -368,30 +420,38 @@
   </div>
 
   <script>
-    // --- קוד חדש לטיפול בתגיות רכב ---
     let vehicleTags = JSON.parse(localStorage.getItem("vehicleTags")) || {};
 
-    // בדיקה והשלמה של מספרים חסרים (כפי שביקשת)
+    // השלמת תגים חסרים
     for (let i = 1; i <= 1802; i++) {
       if (!vehicleTags.hasOwnProperty(i)) {
         vehicleTags[i] = "all";
       }
     }
-    // שמירה ראשונית אם היו שינויים
     localStorage.setItem("vehicleTags", JSON.stringify(vehicleTags));
-    console.log("vehicleTags loaded:", vehicleTags);
-
+    
     function saveVehicleType(value) {
         if (!currentQuestion) return;
-        const qId = currentQuestion["מספר שאלה"]; // לדוגמה "005" או "5"
-        // המרה למספר כדי שיתאים למפתח באובייקט (למשל 5)
+        const qId = currentQuestion["מספר שאלה"]; 
         const qIdNum = parseInt(qId);
         
         vehicleTags[qIdNum] = value;
         localStorage.setItem("vehicleTags", JSON.stringify(vehicleTags));
         console.log(`Saved tag for Q${qIdNum}: ${value}`);
     }
-    // --- סוף קוד חדש ---
+
+    let activeVehicleFilters = []; 
+
+    function toggleVehicleFilter(element, type) {
+        if (activeVehicleFilters.includes(type)) {
+            activeVehicleFilters = activeVehicleFilters.filter(t => t !== type);
+            element.classList.remove('active');
+        } else {
+            activeVehicleFilters.push(type);
+            element.classList.add('active');
+        }
+        console.log("Active Filters:", activeVehicleFilters);
+    }
 
     let allData = [];
     let selectedCategories = [];
@@ -444,17 +504,13 @@
     }
 
     function startPractice() {
-      // בדיקת סינון מועדפים
       const onlyFavs = document.getElementById('onlyFavorites').checked;
 
-      // בדיקת קטגוריות
       const checkboxes = document.querySelectorAll('#categoryList input[type=checkbox]:checked');
       selectedCategories = Array.from(checkboxes).map(cb => cb.value);
       
-      // אם לא נבחרו קטגוריות, בחר את כולן אוטומטית אם המשתמש בחר רק מועדפים, אחרת התראה
       if (selectedCategories.length === 0) {
            if (onlyFavs) {
-               // אם בחר רק מועדפים ולא סימן קטגוריה, נניח שהוא רוצה מכל הקטגוריות
                selectedCategories = [...new Set(allData.map(q => q["קטגוריה"]))];
            } else {
                return alert("בחר לפחות קטגוריה אחת");
@@ -472,7 +528,6 @@
       document.getElementById('categorySelection').style.display = 'none';
       document.getElementById('questionContainer').style.display = 'block';
       
-      // העברת הדגל לפונקציה הבאה
       nextQuestion(onlyFavs);
     }
 
@@ -494,7 +549,6 @@
       }
     }
 
-    // פונקציית העזר לקבלת המאגר המסונן - נשמרת מחוץ ל-nextQuestion כדי לא לחשב כל פעם מחדש
     let isFirstLoad = true;
     let onlyFavsMode = false;
 
@@ -510,20 +564,25 @@
       const minCorrect = parseInt(document.getElementById('minCorrect')?.value || '0');
       const maxCorrect = parseInt(document.getElementById('maxCorrect')?.value || '999');
 
-      // סינון לפי קטגוריה
       let pool = allData.filter(q => selectedCategories.includes(q["קטגוריה"]));
 
-      // סינון לפי מועדפים (אם נבחר)
+      if (activeVehicleFilters.length > 0) {
+          pool = pool.filter(q => {
+              const qIdNum = parseInt(q["מספר שאלה"]);
+              const tag = vehicleTags[qIdNum] || 'all';
+              return tag === 'all' || activeVehicleFilters.includes(tag);
+          });
+      }
+
       if (onlyFavsMode) {
           pool = pool.filter(q => favorites.includes(q["מספר שאלה"]));
           if (pool.length === 0) {
-              alert("אין לך שאלות במועדפים בקטגוריות אלו.");
+              alert("אין לך שאלות במועדפים התואמות את הסינון (קטגוריה/סוג רכב).");
               location.reload(); 
               return;
           }
       }
 
-      // סינוני סטטיסטיקה
       if (filterAppeared) {
         pool = pool.filter(q => {
           const stat = statsData[q["מספר שאלה"]] || { appeared: 0 };
@@ -546,7 +605,6 @@
       currentQuestion = pool[Math.floor(Math.random() * pool.length)];
       displayQuestion();
       
-      // גלילה למעלה
       window.scrollTo(0, 0);
     }
 
@@ -589,10 +647,7 @@
       const stat = JSON.parse(localStorage.getItem('questionStats') || '{}')[qNumStr] || { appeared: 0, correct: 0 };
       document.getElementById('questionStatsDisplay').textContent = `ידע: ${stat.correct}/${stat.appeared}`;
 
-      // --- עדכון סוג הרכב הנבחר עבור השאלה הנוכחית ---
-      const savedTag = vehicleTags[qNum] || 'all'; // ברירת מחדל 'all' אם אין
-      
-      // מציאת הרדיו המתאים וסימונו
+      const savedTag = vehicleTags[qNum] || 'all'; 
       const radios = document.getElementsByName('vehicleType');
       for(let radio of radios) {
           if(radio.value === savedTag) {
