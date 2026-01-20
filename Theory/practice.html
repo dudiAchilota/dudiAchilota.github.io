@@ -306,6 +306,27 @@
   </div>
 
   <script>
+// קריאה מה-localStorage או יצירת אובייקט ריק אם לא קיים
+let vehicleTags = JSON.parse(localStorage.getItem("vehicleTags")) || {};
+
+// בדיקה והשלמה של מספרים חסרים
+for (let i = 1; i <= 1802; i++) {
+  if (!vehicleTags.hasOwnProperty(i)) {
+    vehicleTags[i] = "all";
+  }
+}
+
+// שמירה חזרה ל-localStorage
+localStorage.setItem("vehicleTags", JSON.stringify(vehicleTags));
+
+// בדיקה בקונסול
+console.log("vehicleTags עודכן:", vehicleTags);
+
+
+
+
+1;
+
     let allData = [];
     let selectedCategories = [];
     let currentQuestion = null;
