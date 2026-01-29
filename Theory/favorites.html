@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>המועדפים שלי</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* מונע גלילה של כל העמוד */
+    }
+
+    /* --- Header --- */
+    header {
+      background: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 50px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    .btn-back {
+      background: #95a5a6;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    /* --- Layout Container --- */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden; /* התוכן בפנים נגלל */
+    }
+
+    /* --- Sidebar (Right List) --- */
+    .sidebar {
+      width: 350px;
+      background: white;
+      border-left: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .search-box {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      background: #fcfcfc;
+      position: sticky;
+      top: 0;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .q-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .q-item {
+      padding: 15px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .q-item:hover {
+      background-color: #f9f9f9;
+    }
+
+    .q-item.active {
+      background-color: #e3f2fd;
+      border-right: 4px solid #2196F3;
+    }
+
+    .q-item-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    .q-item-text {
+      font-size: 0.85rem;
+      color: #777;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* --- Main Content (Left Question) --- */
+    .content-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .question-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .question-title {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .fav-btn {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #f1c40f; 
+      line-height: 1;
+      transition: transform 0.1s;
+    }
+    
+    .fav-btn:hover { transform: scale(1.1); }
+    .fav-btn.removed { color: #ccc; }
+
+    #questionText {
+        font-size: 1.2rem;
+        line-height: 1.5;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .image {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      display: block;
+      margin: 0.5rem auto;
+      border-radius: 8px;
+    }
+
+    /* Answers Styling */
+    .answers label {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      margin: 0.6rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    
+    .answers label:hover { background: #f9f9f9; }
+    .answers input[type="radio"] { margin-left: 12px; flex-shrink: 0; width: 18px; height: 18px; }
+
+    .answers .correct { 
+        background-color: #d4edda !important; 
+        border-color: #c3e6cb !important;
+        color: #155724;
+    }
+    .answers .wrong { 
+        background-color: #f8d7da !important; 
+        border-color: #f5c6cb !important;
+        color: #721c24;
+    }
+
+    .check-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    .check-btn:disabled { background-color: #ccc; cursor: default; }
+
+    .empty-state {
+        text-align: center;
+        margin-top: 50px;
+        color: #777;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .main-container {
+            flex-direction: column;
+        }
+        .sidebar {
+            width: 100%;
+            height: 35%; 
+            border-left: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .content-area {
+            height: 65%;
+        }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>המועדפים שלי (<span id="favCount">0</span>)</h1>
+    <a href="index.html" class="btn-back">חזרה לראשי</a>
+  </header>
+
+  <div class="main-container">
+    <div class="sidebar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="חפש בתוך המועדפים..." onkeyup="filterList()">
+        </div>
+        <ul id="questionsList" class="q-list">
+            </ul>
+    </div>
+
+    <div class="content-area" id="contentArea">
+        <div id="welcomeMessage" class="empty-state">
+            <h2>בחר שאלה מהרשימה</h2>
+            <p>לחץ על שאלה בתפריט כדי להציג אותה ולתרגל.</p>
+        </div>
+
+        <div id="questionCard" class="question-card" style="display:none;">
+            <div class="header-row">
+                <h3 id="qNumDisplay" class="question-title">שאלה X</h3>
+                <button id="favBtn" class="fav-btn" onclick="toggleFavorite()" title="הסר ממועדפים">★</button>
+            </div>
+
+            <div id="questionText"></div>
+            <img id="questionImage" class="image" style="display:none" />
+            
+            <div class="answers" id="answersContainer"></div>
+
+            <button id="checkBtn" class="check-btn" onclick="checkAnswer()">בדיקה</button>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    let allData = [];
+    let favorites = [];
+    let favoriteQuestions = [];
+    let currentQuestion = null;
+
+    // Load Data
+    function init() {
+        const savedData = localStorage.getItem('theoryData');
+        const savedFavs = localStorage.getItem('favorites');
+
+        if (!savedData) {
+            alert("לא נמצא מאגר שאלות. אנא טען קובץ בדף הראשי.");
+            return;
+        }
+
+        allData = JSON.parse(savedData);
+        favorites = JSON.parse(savedFavs || '[]');
+
+        // Filter only favorite questions objects
+        favoriteQuestions = allData.filter(q => favorites.includes(q["מספר שאלה"]));
+        
+        // Sort by question number
+        favoriteQuestions.sort((a, b) => parseInt(a["מספר שאלה"]) - parseInt(b["מספר שאלה"]));
+
+        updateFavCount();
+        renderList(favoriteQuestions);
+
+        if (favoriteQuestions.length === 0) {
+            document.getElementById('welcomeMessage').innerHTML = "<h2>אין שאלות במועדפים</h2><p>חזור לתרגול וסמן שאלות בכוכב.</p>";
+        }
+    }
+
+    function updateFavCount() {
+        document.getElementById('favCount').innerText = favorites.length;
+    }
+
+    // Render Sidebar List
+    function renderList(list) {
+        const ul = document.getElementById('questionsList');
+        ul.innerHTML = '';
+
+        list.forEach(q => {
+            const li = document.createElement('li');
+            li.className = 'q-item';
+            li.dataset.id = q["מספר שאלה"];
+            li.onclick = () => loadQuestion(q);
+            
+            li.innerHTML = `
+                <div class="q-item-header">
+                    <span>${q["מספר שאלה"]}</span>
+                    <span style="font-size:0.8rem; color:#999;">${q["קטגוריה"]}</span>
+                </div>
+                <div class="q-item-text">${q["שאלה"]}</div>
+            `;
+            ul.appendChild(li);
+        });
+    }
+
+    // Filter List (Search)
+    function filterList() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = favoriteQuestions.filter(q => 
+            q["שאלה"].toLowerCase().includes(term) || 
+            q["מספר שאלה"].includes(term)
+        );
+        renderList(filtered);
+    }
+
+    // Load Question into View
+    function loadQuestion(question) {
+        currentQuestion = question;
+        
+        // UI Updates
+        document.getElementById('welcomeMessage').style.display = 'none';
+        document.getElementById('questionCard').style.display = 'block';
+        
+        // Highlight active item in sidebar
+        document.querySelectorAll('.q-item').forEach(el => el.classList.remove('active'));
+        const activeItem = document.querySelector(`.q-item[data-id='${question["מספר שאלה"]}']`);
+        if(activeItem) activeItem.classList.add('active');
+
+        // Populate Content
+        document.getElementById('qNumDisplay').textContent = `שאלה ${question["מספר שאלה"]}`;
+        document.getElementById('questionText').textContent = question["שאלה"];
+        
+        // Image
+        const img = document.getElementById('questionImage');
+        if (question["קישור לתמונה"]) {
+            img.src = question["קישור לתמונה"];
+            img.style.display = 'block';
+        } else {
+            img.style.display = 'none';
+        }
+
+        // Favorites Button State
+        const favBtn = document.getElementById('favBtn');
+        if (favorites.includes(question["מספר שאלה"])) {
+            favBtn.innerHTML = '★';
+            favBtn.classList.remove('removed');
+        } else {
+            favBtn.innerHTML = '☆';
+            favBtn.classList.add('removed');
+        }
+
+        // Answers
+        const options = ["תשובה 1", "תשובה 2", "תשובה 3", "תשובה 4"]
+            .map(k => question[k]).sort(() => Math.random() - 0.5);
+
+        const ansContainer = document.getElementById('answersContainer');
+        ansContainer.innerHTML = options.map(ans => `
+            <label>
+                <input type="radio" name="answer" value='${ans}'>
+                <span>${ans}</span>
+            </label>
+        `).join('');
+
+        const checkBtn = document.getElementById('checkBtn');
+        checkBtn.disabled = false;
+        checkBtn.textContent = "בדיקה";
+        checkBtn.style.backgroundColor = "#2196F3";
+    }
+
+    // Check Answer Logic
+    function checkAnswer() {
+        const selected = document.querySelector('input[name=answer]:checked');
+        if (!selected) return alert("בחר תשובה");
+
+        const correct = currentQuestion["תשובה נכונה"].trim();
+        const radios = document.querySelectorAll('input[name=answer]');
+        const checkBtn = document.getElementById('checkBtn');
+
+        radios.forEach(r => {
+            const lbl = r.parentElement;
+            if (r.value === correct) lbl.classList.add('correct');
+            if (r.checked && r.value !== correct) lbl.classList.add('wrong');
+        });
+
+        checkBtn.disabled = true;
+        
+        // Update Stats Logic (Optional - reusing logic from main page if needed)
+        updateStats(currentQuestion["מספר שאלה"], selected.value === correct);
+    }
+
+    function updateStats(id, isCorrect) {
+        let stats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+        if (!stats[id]) stats[id] = { appeared: 0, correct: 0 };
+        
+        stats[id].appeared++;
+        if (isCorrect) stats[id].correct++;
+        
+        localStorage.setItem('questionStats', JSON.stringify(stats));
+    }
+
+    // Toggle Favorite
+    function toggleFavorite() {
+        if (!currentQuestion) return;
+        
+        const qId = currentQuestion["מספר שאלה"];
+        const btn = document.getElementById('favBtn');
+        const idx = favorites.indexOf(qId);
+
+        if (idx > -1) {
+            // Remove
+            favorites.splice(idx, 1);
+            btn.innerHTML = '☆';
+            btn.classList.add('removed');
+            
+            // Visual feedback in sidebar
+            const listItem = document.querySelector(`.q-item[data-id='${qId}']`);
+            if (listItem) {
+                listItem.style.opacity = '0.5';
+                listItem.style.textDecoration = 'line-through';
+            }
+        } else {
+            // Add back (in case of accidental click)
+            favorites.push(qId);
+            btn.innerHTML = '★';
+            btn.classList.remove('removed');
+             const listItem = document.querySelector(`.q-item[data-id='${qId}']`);
+            if (listItem) {
+                listItem.style.opacity = '1';
+                listItem.style.textDecoration = 'none';
+            }
+        }
+
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        updateFavCount();
+        
+        // Note: We don't refresh the list immediately to avoid the question jumping away while the user is looking at it.
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
