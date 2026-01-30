@@ -294,8 +294,8 @@
 
     // Load Data
     function init() {
-        const savedData = localStorage.getItem('theoryData');
-        const savedFavs = localStorage.getItem('favorites');
+        const savedData = localStorage.getItem('theory_stats');
+        const savedFavs = localStorage.getItem('theory_favorites');
 
         if (!savedData) {
             alert("לא נמצא מאגר שאלות. אנא טען קובץ בדף הראשי.");
@@ -431,13 +431,13 @@
     }
 
     function updateStats(id, isCorrect) {
-        let stats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+        let stats = JSON.parse(localStorage.getItem('theory_stats') || '{}');
         if (!stats[id]) stats[id] = { appeared: 0, correct: 0 };
         
         stats[id].appeared++;
         if (isCorrect) stats[id].correct++;
         
-        localStorage.setItem('questionStats', JSON.stringify(stats));
+        localStorage.setItem('theory_stats', JSON.stringify(stats));
     }
 
     // Toggle Favorite
@@ -472,7 +472,7 @@
             }
         }
 
-        localStorage.setItem('favorites', JSON.stringify(favorites));
+        localStorage.setItem('theory_favorites', JSON.stringify(favorites));
         updateFavCount();
         
         // Note: We don't refresh the list immediately to avoid the question jumping away while the user is looking at it.

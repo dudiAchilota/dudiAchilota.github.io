@@ -185,12 +185,10 @@
       text-align: center;
     }
     
-    /* --- תיקון העיצוב: מסגרת רק על המועדפים --- */
     .top-filters-container {
         display: flex;
         justify-content: space-between;
         align-items: center; 
-        /* הסרנו את הרקע והבורדר מהמיכל הראשי */
         background-color: transparent;
         border: none;
         padding: 0;
@@ -200,16 +198,13 @@
     }
 
     .fav-section {
-        /* העברנו את העיצוב הצהוב לכאן */
         background-color: #fff9db;
         border: 1px solid #f1c40f;
         padding: 10px;
         border-radius: 6px;
-        
         font-weight: bold;
         display: flex;
         align-items: center;
-        /* כדי שלא יתפוס את כל הרוחב אם לא צריך */
         flex: 0 1 auto; 
     }
 
@@ -218,7 +213,6 @@
         flex-direction: column;
         align-items: flex-end; 
         flex: 1;
-        /* ללא רקע */
     }
 
     .vehicle-filter-title {
@@ -253,7 +247,6 @@
         font-weight: bold;
     }
 
-    /* --- סיווג רכב (בתחתית השאלה) --- */
     .vehicle-types {
       margin-top: 1.5rem;
       padding-top: 1rem;
@@ -301,7 +294,6 @@
       color: #2196F3;
     }
 
-    /* --- עיגול ציון --- */
     #scoreCircleContainer {
       position: fixed;
       top: 10px;
@@ -362,7 +354,7 @@
                 <div class="vehicle-filter-title">סנן לפי סוג רכב:</div>
                 <div class="vehicle-filter-options">
                     <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'motorcycle')">אופנוע</div>
-                    <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'private')">פרטי</div>
+                    <div class="v-filter-btn active" onclick="toggleVehicleFilter(this, 'private')">פרטי</div>
                     <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'truck')">משא</div>
                     <div class="v-filter-btn" onclick="toggleVehicleFilter(this, 'public')">ציבורי</div>
                 </div>
@@ -420,27 +412,29 @@
   </div>
 
   <script>
-    let vehicleTags = JSON.parse(localStorage.getItem("vehicleTags")) || {};
+    // הגדרת מפתחות ה-localStorage החדשים
+    const KEYS = {
+        DATA: 'theory_data',
+        TAGS: 'theory_vehicleTags',
+        STATS: 'theory_stats',
+        FAVS: 'theory_favorites',
+        LAST_CATS: 'theory_lastCategories'
+    };
 
-    // השלמת תגים חסרים
-    for (let i = 1; i <= 1802; i++) {
-      if (!vehicleTags.hasOwnProperty(i)) {
-        vehicleTags[i] = "all";
-      }
-    }
-    localStorage.setItem("vehicleTags", JSON.stringify(vehicleTags));
+    let vehicleTags = {};
     
+    // מוגדר כברירת מחדל ל-'private'
+    let activeVehicleFilters = ['private']; 
+
     function saveVehicleType(value) {
         if (!currentQuestion) return;
         const qId = currentQuestion["מספר שאלה"]; 
         const qIdNum = parseInt(qId);
         
         vehicleTags[qIdNum] = value;
-        localStorage.setItem("vehicleTags", JSON.stringify(vehicleTags));
+        localStorage.setItem(KEYS.TAGS, JSON.stringify(vehicleTags));
         console.log(`Saved tag for Q${qIdNum}: ${value}`);
     }
-
-    let activeVehicleFilters = []; 
 
     function toggleVehicleFilter(element, type) {
         if (activeVehicleFilters.includes(type)) {
@@ -462,10 +456,30 @@
     let sessionTotal = 0;
     let sessionCorrect = 0;
 
-    function loadData() {
-      const saved = localStorage.getItem('theoryData');
-      const catSaved = JSON.parse(localStorage.getItem('lastCategories') || '[]');
-      favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    // הפונקציה הפכה ל-async כדי לתמוך ב-fetch
+    async function loadData() {
+      // 1. טעינת נתוני שאלות (השם שונה ל-theory_data)
+      const saved = localStorage.getItem(KEYS.DATA);
+      const catSaved = JSON.parse(localStorage.getItem(KEYS.LAST_CATS) || '[]');
+      favorites = JSON.parse(localStorage.getItem(KEYS.FAVS) || '[]');
+
+      // 2. טעינת תיוגי רכב מקובץ חיצוני או מזיכרון
+      const storedTags = localStorage.getItem(KEYS.TAGS);
+      if (storedTags) {
+          vehicleTags = JSON.parse(storedTags);
+      } else {
+          // ניסיון לטעון מהקובץ vehicle_tags.json
+          try {
+              const response = await fetch('https://dudiachilota.github.io/Theory/vehicle_tags.json');
+              if (response.ok) {
+                  vehicleTags = await response.json();
+                  localStorage.setItem(KEYS.TAGS, JSON.stringify(vehicleTags));
+              }
+          } catch (e) {
+              console.warn("Could not load vehicle_tags.json", e);
+              vehicleTags = {}; 
+          }
+      }
 
       if (saved) {
         allData = JSON.parse(saved);
@@ -500,7 +514,7 @@
             btn.classList.add('active');
             btn.innerHTML = '★';
         }
-        localStorage.setItem('favorites', JSON.stringify(favorites));
+        localStorage.setItem(KEYS.FAVS, JSON.stringify(favorites));
     }
 
     function startPractice() {
@@ -517,7 +531,7 @@
            }
       }
       
-      localStorage.setItem('lastCategories', JSON.stringify(selectedCategories));
+      localStorage.setItem(KEYS.LAST_CATS, JSON.stringify(selectedCategories));
       
       sessionTotal = 0;
       sessionCorrect = 0;
@@ -555,7 +569,7 @@
     function nextQuestion(forceFavMode = null) {
       if (forceFavMode !== null) onlyFavsMode = forceFavMode;
 
-      const statsData = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const statsData = JSON.parse(localStorage.getItem(KEYS.STATS) || '{}');
       const filterAppeared = document.getElementById('filterAppeared')?.checked;
       const filterCorrect = document.getElementById('filterCorrect')?.checked;
 
@@ -644,7 +658,7 @@
 
       document.getElementById('showAnswerBtn').disabled = false;
 
-      const stat = JSON.parse(localStorage.getItem('questionStats') || '{}')[qNumStr] || { appeared: 0, correct: 0 };
+      const stat = JSON.parse(localStorage.getItem(KEYS.STATS) || '{}')[qNumStr] || { appeared: 0, correct: 0 };
       document.getElementById('questionStatsDisplay').textContent = `ידע: ${stat.correct}/${stat.appeared}`;
 
       const savedTag = vehicleTags[qNum] || 'all'; 
@@ -685,13 +699,13 @@
     }
 
     function saveStats() {
-      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const currentStats = JSON.parse(localStorage.getItem(KEYS.STATS) || '{}');
       for (let key in stats) {
         if (!currentStats[key]) currentStats[key] = { appeared: 0, correct: 0 };
         currentStats[key].appeared += stats[key].appeared;
         currentStats[key].correct += stats[key].correct;
       }
-      localStorage.setItem('questionStats', JSON.stringify(currentStats));
+      localStorage.setItem(KEYS.STATS, JSON.stringify(currentStats));
       stats = {};
     }
 

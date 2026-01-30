@@ -213,9 +213,9 @@
 
     function loadData() {
       // טעינת שאלות
-      const saved = localStorage.getItem('theoryData');
+      const saved = localStorage.getItem('theory_stats');
       if (!saved) {
-        alert("לא נמצא מידע על שאלות ב-LocalStorage (theoryData).");
+        alert("לא נמצא מידע על שאלות ב-LocalStorage (theory_stats).");
         return;
       }
       allData = JSON.parse(saved);
@@ -224,7 +224,7 @@
       });
 
       // טעינת סיווגי רכב שנשמרו בעבר
-      const savedTags = localStorage.getItem('vehicleTags');
+      const savedTags = localStorage.getItem('theory_vehicleTags');
       if (savedTags) {
         vehicleTags = JSON.parse(savedTags);
       }
@@ -280,7 +280,7 @@
       const id = q["מספר שאלה"];
       
       vehicleTags[id] = value;
-      localStorage.setItem('vehicleTags', JSON.stringify(vehicleTags));
+      localStorage.setItem('theory_vehicleTags', JSON.stringify(vehicleTags));
     }
 
     function nextQuestion() {
@@ -332,20 +332,20 @@
     }
 
     function saveStats() {
-      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const currentStats = JSON.parse(localStorage.getItem('theory_stats') || '{}');
       for (let key in stats) {
         if (!currentStats[key]) currentStats[key] = { appeared: 0, correct: 0 };
         currentStats[key].appeared += stats[key].appeared;
         currentStats[key].correct += stats[key].correct;
       }
-      localStorage.setItem('questionStats', JSON.stringify(currentStats));
+      localStorage.setItem('theory_stats', JSON.stringify(currentStats));
       stats = {};
     }
 
     function updateStatsDisplay() {
       const q = sortedData[currentIndex];
       const id = q["מספר שאלה"];
-      const currentStats = JSON.parse(localStorage.getItem('questionStats') || '{}');
+      const currentStats = JSON.parse(localStorage.getItem('theory_stats') || '{}');
       const stat = currentStats[id] || { appeared: 0, correct: 0 };
       document.getElementById('statsBox').textContent = `הצלחות: ${stat.correct}/${stat.appeared}`;
     }
