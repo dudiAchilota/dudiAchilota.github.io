@@ -28,7 +28,7 @@
 
     async function loadExcelAndStore() {
       try {
-        const response = await fetch('https://dudiachilota.github.io/Theory/Theory.csv');
+        const response = await fetch('https://dudiachilota.github.io/Theory/Theory.xlsx');
         if (!response.ok) throw new Error('File not found');
 
         const arrayBuffer = await response.arrayBuffer();
