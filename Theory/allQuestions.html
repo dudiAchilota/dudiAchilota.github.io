@@ -213,9 +213,9 @@
 
     function loadData() {
       // טעינת שאלות
-      const saved = localStorage.getItem('theory_stats');
+      const saved = localStorage.getItem('theory_data');
       if (!saved) {
-        alert("לא נמצא מידע על שאלות ב-LocalStorage (theory_stats).");
+        alert("לא נמצא מידע על שאלות ב-LocalStorage (theory_data).");
         return;
       }
       allData = JSON.parse(saved);
