@@ -37,7 +37,7 @@
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        localStorage.setItem('theory_stats', JSON.stringify(jsonData));
+        localStorage.setItem('theory_data', JSON.stringify(jsonData));
         theoryData = jsonData;
 
         console.log('Excel loaded and saved:', theoryData);
@@ -48,7 +48,7 @@
     }
 
     function init() {
-      const savedData = localStorage.getItem('theory_stats');
+      const savedData = localStorage.getItem('theory_data');
       if (savedData) {
         theoryData = JSON.parse(savedData);
         console.log('Loaded from localStorage:', theoryData);
@@ -58,7 +58,7 @@
     }
 
     function clearData() {
-      localStorage.removeItem('theory_stats');
+      localStorage.removeItem('theory_data');
       alert("Data cleared. Refresh the page to reload.");
     }
 
