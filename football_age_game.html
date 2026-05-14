@@ -1,0 +1,376 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+body{font-family:var(--font-sans)}
+.screen{display:none;padding:0.75rem 0 1.5rem}
+.screen.active{display:block}
+
+.hero-header{background:#534AB7;border-radius:var(--border-radius-lg);padding:1.25rem 1rem;text-align:center;margin-bottom:1rem;color:#EEEDFE}
+.hero-title{font-size:22px;font-weight:500;margin-bottom:4px}
+.hero-sub{font-size:13px;color:#AFA9EC}
+
+.level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.level-card{border:2px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 0.5rem;cursor:pointer;text-align:center;transition:all 0.15s;background:var(--color-background-primary)}
+.level-card:hover{border-color:#7F77DD;background:#EEEDFE}
+.level-card.selected{border-color:#534AB7;background:#534AB7;color:#EEEDFE}
+.level-card.selected .lc-title{color:#EEEDFE}
+.level-card.selected .lc-desc{color:#AFA9EC}
+.level-card.selected .lc-icon{color:#AFA9EC}
+.lc-icon{font-size:24px;margin-bottom:6px;color:var(--color-text-secondary)}
+.lc-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.lc-desc{font-size:11px;color:var(--color-text-secondary)}
+
+.btn-start{width:100%;padding:14px;background:#1D9E75;border:none;border-radius:var(--border-radius-lg);color:#E1F5EE;font-size:16px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s}
+.btn-start:hover{background:#0F6E56}
+.btn-start:active{transform:scale(0.98)}
+
+.btn-table{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-weight:500;cursor:pointer;transition:background 0.15s}
+.btn-table:hover{background:var(--color-background-secondary)}
+
+.nav-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap}
+.btn-back{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-weight:500;cursor:pointer;transition:background 0.15s}
+.btn-back:hover{background:var(--color-background-secondary)}
+
+.progress-wrap{background:var(--color-background-secondary);border-radius:99px;height:8px;margin-bottom:4px;overflow:hidden}
+.progress-fill{height:8px;border-radius:99px;background:#534AB7;transition:width 0.4s cubic-bezier(.4,0,.2,1)}
+.progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:1rem}
+
+.question-label{text-align:center;font-size:14px;color:var(--color-text-secondary);margin-bottom:0.75rem}
+.question-label strong{color:var(--color-text-primary)}
+
+.arena{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:start;margin-bottom:0.75rem}
+.pcard{border:2.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 0.75rem;text-align:center;cursor:pointer;transition:all 0.18s;background:var(--color-background-primary);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.pcard:hover{border-color:#7F77DD;background:#EEEDFE;transform:translateY(-2px)}
+.pcard.correct{border-color:#1D9E75;background:#E1F5EE}
+.pcard.wrong{border-color:#A32D2D;background:#FCEBEB}
+.pcard.same-ok{border-color:#BA7517;background:#FAEEDA}
+.pcard.disabled{cursor:default;transform:none}
+.pcard:hover.disabled{border-color:var(--color-border-tertiary);background:var(--color-background-primary)}
+.pcard.correct.disabled:hover,.pcard.wrong.disabled:hover,.pcard.same-ok.disabled:hover{transform:none}
+.p-pos{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500}
+.pos-FW{background:#FAECE7;color:#993C1D}
+.pos-MF{background:#E6F1FB;color:#185FA5}
+.pos-DF{background:#EAF3DE;color:#3B6D11}
+.pos-GK{background:#FAEEDA;color:#854F0B}
+.p-name{font-size:14px;font-weight:500;color:var(--color-text-primary);line-height:1.3}
+.p-country{font-size:11px;color:var(--color-text-secondary)}
+
+.mid-col{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:16px}
+.vs-pill{background:#534AB7;color:#EEEDFE;border-radius:99px;padding:6px 10px;font-size:12px;font-weight:500}
+.btn-same{display:inline-flex;align-items:center;gap:4px;padding:7px 10px;border-radius:var(--border-radius-md);border:2px solid #BA7517;background:#FAEEDA;color:#633806;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn-same:hover{background:#FAC775;border-color:#854F0B}
+.btn-same.disabled{pointer-events:none;opacity:0.4}
+
+.feedback{border-radius:var(--border-radius-md);padding:12px 14px;font-size:14px;text-align:center;font-weight:500;margin-bottom:0.75rem}
+.fb-ok{background:#E1F5EE;color:#085041;border:1px solid #5DCAA5}
+.fb-no{background:#FCEBEB;color:#501313;border:1px solid #F09595}
+.fb-tie{background:#FAEEDA;color:#412402;border:1px solid #EF9F27}
+
+.btn-next{width:100%;padding:13px;background:#534AB7;border:none;border-radius:var(--border-radius-lg);color:#EEEDFE;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s}
+.btn-next:hover{background:#3C3489}
+.btn-next:active{transform:scale(0.98)}
+
+.result-hero{background:#534AB7;border-radius:var(--border-radius-lg);padding:1.5rem;text-align:center;margin-bottom:1rem;color:#EEEDFE}
+.result-badge{width:90px;height:90px;border-radius:50%;margin:0 auto 0.75rem;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:500;border:3px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15)}
+.rb-num{font-size:30px;line-height:1}
+.rb-lbl{font-size:11px;opacity:0.8}
+
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center}
+.metric .mv{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric .ml{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+
+.save-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:1rem}
+.save-row{display:flex;gap:8px;margin-top:0.75rem}
+.save-row input{flex:1;font-size:14px}
+.btn-save{padding:9px 16px;background:#1D9E75;border:none;border-radius:var(--border-radius-md);color:#E1F5EE;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background 0.15s}
+.btn-save:hover{background:#0F6E56}
+
+.action-row{display:flex;gap:8px;margin-top:0.5rem}
+.btn-replay{flex:1;padding:12px;background:#1D9E75;border:none;border-radius:var(--border-radius-lg);color:#E1F5EE;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s}
+.btn-replay:hover{background:#0F6E56}
+.btn-home{flex:1;padding:12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);color:var(--color-text-primary);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s}
+.btn-home:hover{background:var(--color-background-secondary)}
+
+.lb-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.lb-title{font-size:14px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)}
+.lb-row{display:grid;grid-template-columns:28px 1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.rank{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.r1{background:#FAEEDA;color:#633806}
+.r2{background:#F1EFE8;color:#444441}
+.r3{background:#FAECE7;color:#712B13}
+.rn{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.score-val{font-weight:500;color:#534AB7}
+.level-pill{font-size:11px;padding:2px 7px;border-radius:99px;background:#EEEDFE;color:#3C3489}
+
+.tbl-search-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tbl-search-row input,.tbl-search-row select{flex:1;min-width:110px;font-size:13px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{background:#534AB7;color:#EEEDFE;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;padding:8px;font-weight:500;cursor:pointer}
+th:hover{background:#3C3489}
+td{padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tr:hover td{background:var(--color-background-secondary)}
+.tbl-count{font-size:12px;color:var(--color-text-secondary)}
+</style>
+
+<h2 class="sr-only">משחק ניחוש גיל שחקני כדורגל</h2>
+
+<div id="s-home" class="screen active">
+  <div class="hero-header">
+    <div style="font-size:32px;margin-bottom:6px"><i class="ti ti-ball-football" aria-hidden="true"></i></div>
+    <div class="hero-title">מי יותר זקן?</div>
+    <div class="hero-sub">נחש מי מהשחקנים נולד קודם</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">בחר רמה</div>
+    <button class="btn-table" onclick="showScreen('s-table')"><i class="ti ti-table" aria-hidden="true"></i> טבלת שחקנים</button>
+  </div>
+  <div class="level-grid">
+    <div class="level-card" id="lc-easy" onclick="selectLevel('easy')">
+      <div class="lc-icon"><i class="ti ti-seeding" aria-hidden="true"></i></div>
+      <div class="lc-title">קל</div>
+      <div class="lc-desc">אקראי לגמרי</div>
+    </div>
+    <div class="level-card" id="lc-medium" onclick="selectLevel('medium')">
+      <div class="lc-icon"><i class="ti ti-flame" aria-hidden="true"></i></div>
+      <div class="lc-title">בינוני</div>
+      <div class="lc-desc">פער עד 8 שנים</div>
+    </div>
+    <div class="level-card" id="lc-hard" onclick="selectLevel('hard')">
+      <div class="lc-icon"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+      <div class="lc-title">קשה</div>
+      <div class="lc-desc">פער עד 4 שנים</div>
+    </div>
+  </div>
+  <button class="btn-start" onclick="startGame()"><i class="ti ti-player-play" aria-hidden="true"></i> התחל משחק</button>
+  <div style="margin-top:1rem" id="lb-home"></div>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="nav-bar">
+    <button class="btn-back" onclick="confirmHome()"><i class="ti ti-arrow-left" aria-hidden="true"></i> חזור</button>
+    <div style="font-size:12px;color:var(--color-text-secondary)" id="level-label"></div>
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)" id="q-counter"></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  <div class="progress-meta">
+    <span id="correct-count">0 נכון</span>
+    <span id="score-now">ציון: —</span>
+  </div>
+  <div class="question-label">לחץ על מי שנולד <strong>קודם</strong> — מי יותר זקן</div>
+  <div class="arena">
+    <div class="pcard" id="pc-a" onclick="answer('a')">
+      <span class="p-pos pos-FW" id="pa-pos">FW</span>
+      <div class="p-name" id="pa-name">שחקן א</div>
+      <div class="p-country" id="pa-country">מדינה</div>
+    </div>
+    <div class="mid-col">
+      <div class="vs-pill">VS</div>
+      <button class="btn-same" id="btn-same" onclick="answer('same')"><i class="ti ti-equal" aria-hidden="true"></i> אותו גיל</button>
+    </div>
+    <div class="pcard" id="pc-b" onclick="answer('b')">
+      <span class="p-pos pos-MF" id="pb-pos">MF</span>
+      <div class="p-name" id="pb-name">שחקן ב</div>
+      <div class="p-country" id="pb-country">מדינה</div>
+    </div>
+  </div>
+  <div id="feedback-area"></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()" style="display:none"><i class="ti ti-arrow-right" aria-hidden="true"></i> שאלה הבאה</button>
+</div>
+
+<div id="s-result" class="screen">
+  <div class="result-hero">
+    <div class="result-badge"><div class="rb-num" id="r-pct">0</div><div class="rb-lbl">מתוך 100</div></div>
+    <div style="font-size:18px;font-weight:500;margin-bottom:4px" id="r-msg"></div>
+    <div style="font-size:13px;color:#AFA9EC" id="r-sub"></div>
+  </div>
+  <div class="metrics" id="r-metrics"></div>
+  <div class="save-card">
+    <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">שמור תוצאה</div>
+    <div class="save-row">
+      <input type="text" id="save-name" placeholder="הקלד שמך..." maxlength="30">
+      <button class="btn-save" onclick="saveScore()"><i class="ti ti-device-floppy" aria-hidden="true"></i> שמור</button>
+    </div>
+    <div id="save-msg" style="font-size:12px;margin-top:6px;color:var(--color-text-secondary)"></div>
+  </div>
+  <div id="lb-result"></div>
+  <div class="action-row">
+    <button class="btn-replay" onclick="startGame()"><i class="ti ti-refresh" aria-hidden="true"></i> שחק שוב</button>
+    <button class="btn-home" onclick="showScreen('s-home')"><i class="ti ti-home" aria-hidden="true"></i> דף הבית</button>
+  </div>
+</div>
+
+<div id="s-table" class="screen">
+  <div class="nav-bar">
+    <button class="btn-back" onclick="showScreen('s-home')"><i class="ti ti-arrow-left" aria-hidden="true"></i> חזור</button>
+    <div style="font-size:15px;font-weight:500">טבלת שחקנים</div>
+    <div class="tbl-count" id="tbl-count"></div>
+  </div>
+  <div class="tbl-search-row">
+    <input type="text" id="tbl-q" placeholder="חיפוש שם..." oninput="renderTable()">
+    <select id="tbl-pos" onchange="renderTable()">
+      <option value="">כל הפוזיציות</option>
+      <option value="FW">תוקף</option>
+      <option value="MF">קשר</option>
+      <option value="DF">בלם</option>
+      <option value="GK">שוער</option>
+    </select>
+    <select id="tbl-country" onchange="renderTable()"><option value="">כל המדינות</option></select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <colgroup><col style="width:38%"><col style="width:18%"><col style="width:14%"><col style="width:30%"></colgroup>
+      <thead><tr>
+        <th onclick="sortTable('name')">שם <span id="srt-name"></span></th>
+        <th onclick="sortTable('year')">שנת לידה <span id="srt-year"></span></th>
+        <th onclick="sortTable('pos')">עמדה <span id="srt-pos"></span></th>
+        <th onclick="sortTable('country')">מדינה <span id="srt-country"></span></th>
+      </tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const PLAYERS=[["Lionel Messi",1987,"FW","ארגנטינה"],["Cristiano Ronaldo",1985,"FW","פורטוגל"],["Neymar Jr.",1992,"FW","ברזיל"],["Kylian Mbappé",1998,"FW","צרפת"],["Erling Haaland",2000,"FW","נורווגיה"],["Robert Lewandowski",1988,"FW","פולין"],["Karim Benzema",1987,"FW","צרפת"],["Luka Modrić",1985,"MF","קרואטיה"],["Kevin De Bruyne",1991,"MF","בלגיה"],["Virgil van Dijk",1991,"DF","הולנד"],["Mohamed Salah",1992,"FW","מצרים"],["Sadio Mané",1992,"FW","סנגל"],["Sergio Ramos",1986,"DF","ספרד"],["Xavi Hernández",1980,"MF","ספרד"],["Andrés Iniesta",1984,"MF","ספרד"],["Zlatan Ibrahimović",1981,"FW","שבדיה"],["Ronaldinho",1980,"FW","ברזיל"],["Thierry Henry",1977,"FW","צרפת"],["Franck Ribéry",1983,"FW","צרפת"],["Arjen Robben",1984,"FW","הולנד"],["Didier Drogba",1978,"FW","חוף השנהב"],["Wayne Rooney",1985,"FW","אנגליה"],["John Terry",1980,"DF","אנגליה"],["Steven Gerrard",1980,"MF","אנגליה"],["Frank Lampard",1978,"MF","אנגליה"],["Ashley Cole",1980,"DF","אנגליה"],["Rio Ferdinand",1978,"DF","אנגליה"],["Gianluigi Buffon",1978,"GK","איטליה"],["Petr Čech",1982,"GK","צ'כיה"],["Iker Casillas",1981,"GK","ספרד"],["Manuel Neuer",1986,"GK","גרמניה"],["Toni Kroos",1990,"MF","גרמניה"],["Thomas Müller",1989,"FW","גרמניה"],["Philipp Lahm",1983,"DF","גרמניה"],["Bastian Schweinsteiger",1984,"MF","גרמניה"],["Mesut Özil",1988,"MF","גרמניה"],["Marco Reus",1989,"MF","גרמניה"],["Robert Pires",1973,"MF","צרפת"],["Patrick Vieira",1976,"MF","צרפת"],["Claude Makélélé",1973,"MF","צרפת"],["Zinedine Zidane",1972,"MF","צרפת"],["David Trezeguet",1977,"FW","צרפת"],["Nicolas Anelka",1979,"FW","צרפת"],["Hugo Lloris",1986,"GK","צרפת"],["Antoine Griezmann",1991,"FW","צרפת"],["Paul Pogba",1993,"MF","צרפת"],["Kaka",1982,"MF","ברזיל"],["Adriano",1982,"FW","ברזיל"],["Ronaldo Fenomeno",1976,"FW","ברזיל"],["Roberto Carlos",1973,"DF","ברזיל"],["Cafu",1970,"DF","ברזיל"],["Rivaldo",1972,"MF","ברזיל"],["Robinho",1984,"FW","ברזיל"],["Thiago Silva",1984,"DF","ברזיל"],["Dani Alves",1983,"DF","ברזיל"],["David Luiz",1987,"DF","ברזיל"],["Oscar",1991,"MF","ברזיל"],["Willian",1988,"MF","ברזיל"],["Philippe Coutinho",1992,"MF","ברזיל"],["Gabriel Jesus",1997,"FW","ברזיל"],["Alisson Becker",1992,"GK","ברזיל"],["Ederson",1993,"GK","ברזיל"],["Vinicius Jr.",2000,"FW","ברזיל"],["Rodrygo",2001,"FW","ברזיל"],["Casemiro",1992,"MF","ברזיל"],["Raphinha",1996,"FW","ברזיל"],["Samuel Eto'o",1981,"FW","קמרון"],["Michael Essien",1982,"MF","גאנה"],["Yaya Touré",1983,"MF","חוף השנהב"],["Kolo Touré",1981,"DF","חוף השנהב"],["Riyad Mahrez",1991,"FW","אלג'יריה"],["Hakim Ziyech",1993,"MF","מרוקו"],["Achraf Hakimi",1998,"DF","מרוקו"],["Sofyan Amrabat",1996,"MF","מרוקו"],["Victor Osimhen",2001,"FW","ניגריה"],["Raheem Sterling",1994,"FW","אנגליה"],["Harry Kane",1993,"FW","אנגליה"],["Jordan Henderson",1990,"MF","אנגליה"],["Jack Grealish",1995,"MF","אנגליה"],["Jude Bellingham",2003,"MF","אנגליה"],["Bukayo Saka",2001,"MF","אנגליה"],["Phil Foden",2000,"MF","אנגליה"],["Declan Rice",2001,"MF","אנגליה"],["Marcus Rashford",1997,"FW","אנגליה"],["Jadon Sancho",2000,"FW","אנגליה"],["Luke Shaw",1995,"DF","אנגליה"],["Trent Alexander-Arnold",1998,"DF","אנגליה"],["Gareth Bale",1989,"FW","וולס"],["Aaron Ramsey",1990,"MF","וולס"],["Sergio Agüero",1988,"FW","ארגנטינה"],["Carlos Tevez",1984,"FW","ארגנטינה"],["Gonzalo Higuaín",1987,"FW","ארגנטינה"],["Ángel Di María",1988,"MF","ארגנטינה"],["Paulo Dybala",1993,"FW","ארגנטינה"],["Rodrigo De Paul",1994,"MF","ארגנטינה"],["Lautaro Martínez",1997,"FW","ארגנטינה"],["Julián Álvarez",2000,"FW","ארגנטינה"],["Fernando Torres",1984,"FW","ספרד"],["David Villa",1981,"FW","ספרד"],["Carles Puyol",1978,"DF","ספרד"],["Gerard Piqué",1987,"DF","ספרד"],["Jordi Alba",1989,"DF","ספרד"],["Cesc Fàbregas",1987,"MF","ספרד"],["David Silva",1986,"MF","ספרד"],["Juan Mata",1988,"MF","ספרד"],["Alvaro Morata",1992,"FW","ספרד"],["Dani Carvajal",1992,"DF","ספרד"],["Xabi Alonso",1981,"MF","ספרד"],["Ruud van Nistelrooy",1976,"FW","הולנד"],["Wesley Sneijder",1984,"MF","הולנד"],["Robin van Persie",1983,"FW","הולנד"],["Memphis Depay",1994,"FW","הולנד"],["Georginio Wijnaldum",1990,"MF","הולנד"],["Frenkie de Jong",1997,"MF","הולנד"],["Matthijs de Ligt",1999,"DF","הולנד"],["Cody Gakpo",2001,"FW","הולנד"],["Sami Khedira",1987,"MF","גרמניה"],["Mario Götze",1992,"MF","גרמניה"],["Miroslav Klose",1978,"FW","גרמניה"],["Mats Hummels",1988,"DF","גרמניה"],["Leon Goretzka",1995,"MF","גרמניה"],["Joshua Kimmich",1995,"MF","גרמניה"],["Ilkay Gündoğan",1990,"MF","גרמניה"],["Leroy Sané",1996,"FW","גרמניה"],["Jamal Musiala",2003,"MF","גרמניה"],["Florian Wirtz",2003,"MF","גרמניה"],["Alessandro Del Piero",1974,"FW","איטליה"],["Francesco Totti",1976,"FW","איטליה"],["Paolo Maldini",1968,"DF","איטליה"],["Andrea Pirlo",1979,"MF","איטליה"],["Fabio Cannavaro",1973,"DF","איטליה"],["Gennaro Gattuso",1978,"MF","איטליה"],["Mario Balotelli",1990,"FW","איטליה"],["Giorgio Chiellini",1984,"DF","איטליה"],["Leonardo Bonucci",1987,"DF","איטליה"],["Marco Verratti",1992,"MF","איטליה"],["Federico Chiesa",1997,"FW","איטליה"],["Ciro Immobile",1990,"FW","איטליה"],["Nicolo Barella",1997,"MF","איטליה"],["Gianluigi Donnarumma",1999,"GK","איטליה"],["Ivan Rakitić",1988,"MF","קרואטיה"],["Mario Mandžukić",1986,"FW","קרואטיה"],["Marcelo Brozović",1992,"MF","קרואטיה"],["Ivan Perišić",1989,"MF","קרואטיה"],["Mateo Kovačić",1994,"MF","קרואטיה"],["Josip Gvardiol",2002,"DF","קרואטיה"],["Andrei Shevchenko",1976,"FW","אוקראינה"],["Edin Džeko",1986,"FW","בוסניה"],["Miralem Pjanić",1990,"MF","בוסניה"],["Park Ji-sung",1981,"MF","קוריאה"],["Son Heung-min",1992,"FW","קוריאה"],["Shinji Kagawa",1989,"MF","יפן"],["Keisuke Honda",1986,"MF","יפן"],["Christian Pulisic",1998,"MF","ארה\"ב"],["Romelu Lukaku",1993,"FW","בלגיה"],["Eden Hazard",1991,"MF","בלגיה"],["Thibaut Courtois",1992,"GK","בלגיה"],["Dries Mertens",1987,"FW","בלגיה"],["Jan Vertonghen",1987,"DF","בלגיה"],["Vincent Kompany",1986,"DF","בלגיה"],["Lior Refaelov",1986,"MF","ישראל"],["Eran Zahavi",1987,"FW","ישראל"],["Raphaël Varane",1993,"DF","צרפת"],["Ousmane Dembélé",1997,"FW","צרפת"],["Eduardo Camavinga",2002,"MF","צרפת"],["Aurélien Tchouaméni",2000,"MF","צרפת"],["Ruben Dias",1997,"DF","פורטוגל"],["Bruno Fernandes",1994,"MF","פורטוגל"],["Diogo Jota",1996,"FW","פורטוגל"],["Rafael Leão",2000,"FW","פורטוגל"],["Pepe",1983,"DF","פורטוגל"],["Luís Figo",1972,"MF","פורטוגל"],["Granit Xhaka",1992,"MF","שוויץ"],["Pavel Nedvěd",1972,"MF","צ'כיה"],["Patrik Schick",1996,"FW","צ'כיה"],["Marek Hamšík",1987,"MF","סלובקיה"],["David Alaba",1992,"DF","אוסטריה"],["Khvicha Kvaratskhelia",2001,"FW","גאורגיה"],["Aleksandar Mitrović",1994,"FW","סרביה"],["Dušan Vlahović",2000,"FW","סרביה"],["Dušan Tadić",1988,"MF","סרביה"],["Keylor Navas",1986,"GK","קוסטה ריקה"],["Andrey Arshavin",1981,"MF","רוסיה"],["Luis Suárez",1987,"FW","אורוגוואי"],["Diego Godín",1986,"DF","אורוגוואי"],["Edinson Cavani",1987,"FW","אורוגוואי"],["Federico Valverde",1998,"MF","אורוגוואי"],["Darwin Núñez",2001,"FW","אורוגוואי"],["Falcao",1986,"FW","קולומביה"],["James Rodríguez",1991,"MF","קולומביה"],["Carlos Vela",1989,"FW","מקסיקו"],["Javier Hernandez",1988,"FW","מקסיקו"],["Guillermo Ochoa",1985,"GK","מקסיקו"],["Hirving Lozano",1995,"FW","מקסיקו"],["Enzo Fernández",2001,"MF","ארגנטינה"],["Alexis Mac Allister",1998,"MF","ארגנטינה"],["Alexis Sánchez",1988,"FW","צ'ילה"],["Arturo Vidal",1987,"MF","צ'ילה"],["Andy Robertson",1994,"DF","סקוטלנד"],["Ben White",1997,"DF","אנגליה"],["Cole Palmer",2002,"MF","אנגליה"],["Xavi Simons",2003,"MF","הולנד"],["Thomas Partey",1993,"MF","גאנה"],["Pierre-Emerick Aubameyang",1989,"FW","גאבון"],["Franck Kessié",1996,"MF","חוף השנהב"],["Wilfried Zaha",1992,"FW","חוף השנהב"],["Kalidou Koulibaly",1991,"DF","סנגל"],["Ibrahima Konaté",1999,"DF","צרפת"],["Theo Hernández",1997,"DF","צרפת"],["Olivier Giroud",1986,"FW","צרפת"],["Eder Militão",1998,"DF","ברזיל"],["Lucas Paquetá",1997,"MF","ברזיל"],["Endrick",2006,"FW","ברזיל"],["Tijjani Reijnders",1998,"MF","הולנד"],["Naby Keita",1995,"MF","גינאה"],["Rayan Cherki",2003,"MF","צרפת"]];
+
+const TOTAL=20;
+let level=localStorage.getItem('fg_lv')||'easy';
+let gs={};
+let lb=JSON.parse(localStorage.getItem('fg_lb')||'[]');
+let ts={col:'name',dir:1};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='s-home'){selectLevel(level);renderLB('lb-home');}
+  if(id==='s-table'){fillCountries();renderTable();}
+  if(id==='s-result')renderLB('lb-result');
+}
+function selectLevel(l){
+  level=l;localStorage.setItem('fg_lv',l);
+  document.querySelectorAll('.level-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('lc-'+l).classList.add('selected');
+}
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+function buildPairs(){
+  const pool=shuffle(PLAYERS);const pairs=[];const used=new Set();let tries=0;
+  while(pairs.length<TOTAL&&tries<3000){
+    tries++;
+    const i=Math.floor(Math.random()*pool.length),j=Math.floor(Math.random()*pool.length);
+    if(i===j)continue;
+    const a=pool[i],b=pool[j],key=[Math.min(i,j),Math.max(i,j)].join('-');
+    if(used.has(key))continue;
+    const d=Math.abs(a[1]-b[1]);
+    if(level==='medium'&&d>8)continue;
+    if(level==='hard'&&d>4)continue;
+    used.add(key);pairs.push([a,b]);
+  }
+  return pairs;
+}
+function startGame(){
+  gs={pairs:buildPairs(),idx:0,correct:0,answered:false};
+  const lm={easy:'קל',medium:'בינוני',hard:'קשה'};
+  document.getElementById('level-label').textContent='רמה: '+lm[level];
+  showScreen('s-game');loadQ();
+}
+function loadQ(){
+  const[a,b]=gs.pairs[gs.idx];
+  gs.answered=false;
+  document.getElementById('q-counter').textContent=`שאלה ${gs.idx+1} / ${TOTAL}`;
+  document.getElementById('prog').style.width=Math.round((gs.idx/TOTAL)*100)+'%';
+  document.getElementById('correct-count').textContent=gs.correct+' נכון';
+  const sc=gs.idx>0?Math.round((gs.correct/gs.idx)*100):null;
+  document.getElementById('score-now').textContent=sc!==null?'ציון: '+sc:'ציון: —';
+  ['pc-a','pc-b'].forEach(id=>{const el=document.getElementById(id);el.className='pcard';el.style.cursor='pointer';});
+  document.getElementById('btn-same').classList.remove('disabled');
+  document.getElementById('feedback-area').innerHTML='';
+  document.getElementById('btn-next').style.display='none';
+  const sp=(pre,p)=>{
+    document.getElementById('p'+pre+'-name').textContent=p[0];
+    document.getElementById('p'+pre+'-country').textContent=p[3];
+    const pe=document.getElementById('p'+pre+'-pos');
+    pe.textContent=p[2];pe.className='p-pos pos-'+p[2];
+  };
+  sp('a',a);sp('b',b);
+}
+function answer(ch){
+  if(gs.answered)return;
+  gs.answered=true;
+  document.getElementById('btn-same').classList.add('disabled');
+  document.getElementById('pc-a').classList.add('disabled');document.getElementById('pc-a').style.cursor='default';
+  document.getElementById('pc-b').classList.add('disabled');document.getElementById('pc-b').style.cursor='default';
+  const[a,b]=gs.pairs[gs.idx];
+  const same=a[1]===b[1];
+  const corr=same?'same':(a[1]<b[1]?'a':'b');
+  const ok=ch===corr;
+  if(ok)gs.correct++;
+  const fa=document.getElementById('feedback-area');
+  if(ok){
+    const m=same?`נכון! שניהם נולדו ב-${a[1]}`:`נכון! ${corr==='a'?a[0]:b[0]} נולד ב-${corr==='a'?a[1]:b[1]}`;
+    fa.innerHTML=`<div class="feedback ${same?'fb-tie':'fb-ok'}"><i class="ti ti-check" aria-hidden="true"></i> ${m}</div>`;
+    if(corr==='a')document.getElementById('pc-a').classList.add('correct');
+    else if(corr==='b')document.getElementById('pc-b').classList.add('correct');
+    else{document.getElementById('pc-a').classList.add('same-ok');document.getElementById('pc-b').classList.add('same-ok');}
+  } else {
+    const m=same?`אוי! שניהם נולדו ב-${a[1]} — אותו גיל`:`אוי! ${corr==='a'?a[0]:b[0]} נולד ב-${corr==='a'?a[1]:b[1]}`;
+    fa.innerHTML=`<div class="feedback fb-no"><i class="ti ti-x" aria-hidden="true"></i> ${m}</div>`;
+    if(ch==='a')document.getElementById('pc-a').classList.add('wrong');
+    else if(ch==='b')document.getElementById('pc-b').classList.add('wrong');
+    if(corr==='a')document.getElementById('pc-a').classList.add('correct');
+    else if(corr==='b')document.getElementById('pc-b').classList.add('correct');
+    else{document.getElementById('pc-a').classList.add('same-ok');document.getElementById('pc-b').classList.add('same-ok');}
+  }
+  const nb=document.getElementById('btn-next');
+  nb.style.display='flex';
+  if(gs.idx===TOTAL-1){nb.innerHTML='<i class="ti ti-trophy" aria-hidden="true"></i> ראה תוצאות';nb.onclick=showResults;}
+  else{nb.innerHTML='<i class="ti ti-arrow-right" aria-hidden="true"></i> שאלה הבאה';nb.onclick=nextQ;}
+}
+function nextQ(){gs.idx++;if(gs.idx>=TOTAL){showResults();return;}loadQ();}
+function showResults(){
+  const pct=Math.round((gs.correct/TOTAL)*100);
+  gs.fp=pct;gs.fl=level;
+  showScreen('s-result');
+  document.getElementById('r-pct').textContent=pct;
+  const msgs=pct>=90?['מושלם!','ידע כדורגל יוצא דופן']:pct>=70?['כל הכבוד!','תוצאה מרשימה']:pct>=50?['לא רע!','אפשר להשתפר']:['המשך להתאמן','תגיע לשם בקרוב'];
+  document.getElementById('r-msg').textContent=msgs[0];
+  document.getElementById('r-sub').textContent=msgs[1];
+  const lm={easy:'קל',medium:'בינוני',hard:'קשה'};
+  document.getElementById('r-metrics').innerHTML=`<div class="metric"><div class="mv">${gs.correct}</div><div class="ml">נכון</div></div><div class="metric"><div class="mv">${TOTAL-gs.correct}</div><div class="ml">טעות</div></div><div class="metric"><div class="mv">${lm[level]}</div><div class="ml">רמה</div></div>`;
+  document.getElementById('save-msg').textContent='';document.getElementById('save-name').value='';
+}
+function saveScore(){
+  const name=document.getElementById('save-name').value.trim();
+  if(!name){document.getElementById('save-msg').textContent='אנא הקלד שם';return;}
+  lb.push({name,score:gs.fp,level:gs.fl,date:new Date().toLocaleDateString('he-IL')});
+  lb.sort((a,b)=>b.score-a.score);if(lb.length>20)lb=lb.slice(0,20);
+  localStorage.setItem('fg_lb',JSON.stringify(lb));
+  document.getElementById('save-msg').textContent='נשמר!';renderLB('lb-result');
+}
+function renderLB(cid){
+  const el=document.getElementById(cid);
+  if(!lb.length){el.innerHTML='';return;}
+  const lm={easy:'קל',medium:'בינוני',hard:'קשה'};
+  el.innerHTML=`<div class="lb-card"><div class="lb-title"><i class="ti ti-trophy" aria-hidden="true"></i> טבלת שיאים</div>${lb.slice(0,10).map((e,i)=>{const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rn';return`<div class="lb-row"><div class="rank ${rc}">${i+1}</div><div style="font-weight:500">${e.name}</div><span class="level-pill">${lm[e.level]||''}</span><div class="score-val">${e.score}</div></div>`;}).join('')}</div>`;
+}
+function confirmHome(){if(gs.idx>0&&!confirm('לצאת מהמשחק?'))return;showScreen('s-home');}
+function fillCountries(){
+  const s=document.getElementById('tbl-country');if(s.options.length>1)return;
+  [...new Set(PLAYERS.map(p=>p[3]))].sort((a,b)=>a.localeCompare(b,'he')).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o);});
+}
+function sortTable(col){if(ts.col===col)ts.dir*=-1;else{ts.col=col;ts.dir=1;}renderTable();}
+function renderTable(){
+  const q=document.getElementById('tbl-q').value.toLowerCase();
+  const pos=document.getElementById('tbl-pos').value;
+  const country=document.getElementById('tbl-country').value;
+  let data=PLAYERS.filter(p=>(!q||p[0].toLowerCase().includes(q)||p[3].toLowerCase().includes(q))&&(!pos||p[2]===pos)&&(!country||p[3]===country));
+  const ci={name:0,year:1,pos:2,country:3}[ts.col];
+  data.sort((a,b)=>ts.dir*(a[ci]<b[ci]?-1:a[ci]>b[ci]?1:0));
+  document.getElementById('tbl-count').textContent=data.length+' שחקנים';
+  ['name','year','pos','country'].forEach(c=>{document.getElementById('srt-'+c).textContent=ts.col===c?(ts.dir===1?'↑':'↓'):'';});
+  document.getElementById('tbl-body').innerHTML=data.map(p=>`<tr><td style="font-weight:500">${p[0]}</td><td>${p[1]}</td><td><span class="p-pos pos-${p[2]}">${p[2]}</span></td><td>${p[3]}</td></tr>`).join('');
+}
+selectLevel(level);renderLB('lb-home');
+</script>
