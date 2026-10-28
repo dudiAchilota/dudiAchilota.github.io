@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>בחירות 26 – חישוב מנדטים</title>
+<style>
+:root{--bg:#f6f4ee;--card:#fff;--line:#ddd8cc;--tx:#1b2130;--mu:#6b7384;--ac:#a77d0c;--ok:#1f7a4d;--wn:#b36a00;--mono:ui-monospace,Menlo,Consolas,monospace;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#121b2e;--line:#22304a;--tx:#f5f3ee;--mu:#8b94a7;--ac:#d4a72c;--ok:#6fcf97;--wn:#f2a93b}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#121b2e;--line:#22304a;--tx:#f5f3ee;--mu:#8b94a7;--ac:#d4a72c;--ok:#6fcf97;--wn:#f2a93b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Rubik,"Segoe UI",Tahoma,Arial,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:15px;margin:26px 0 10px}
+.mu{color:var(--mu);font-size:13px}.n{font-family:var(--mono)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tabs{display:flex;gap:6px;margin:16px 0}
+.tabs button,.b{background:transparent;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 16px;font:inherit;font-size:14px;cursor:pointer}
+.tabs button.on{background:var(--ac);color:#0b1220;border-color:var(--ac);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+input[type=number]{width:110px;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-family:var(--mono)}
+input[type=range]{accent-color:var(--ac);width:170px}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}.stats .card{flex:1 1 180px}
+.stats b{display:block;font-size:24px;font-family:var(--mono);margin-top:6px}
+.bar{display:flex;height:34px;border-radius:8px;overflow:hidden;position:relative}
+.bar div{display:flex;align-items:center;justify-content:center;color:#0b1220;font-weight:700;font-family:var(--mono);font-size:13px}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12.5px}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-left:6px}
+.pb{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:14px}
+.pb span.l{width:120px;flex-shrink:0}.pb .t{flex:1;background:var(--bg);border-radius:5px;height:20px}
+.pb .t div{height:100%;border-radius:5px;transition:width .3s}.pb .v{width:30px;font-family:var(--mono);font-weight:700}
+.sc{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+th{color:var(--mu);font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:8px 10px;border-bottom:1px solid var(--line)}tr.no{opacity:.5}
+.st{display:flex;gap:12px;margin:14px 0}.st .k{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--ac);color:#0b1220;font-weight:700;display:flex;align-items:center;justify-content:center}
+.st p{margin:4px 0;font-size:14px;line-height:1.7}.hl{color:var(--ac);font-family:var(--mono);font-weight:700}
+.ok{color:var(--ok)}.wn{color:var(--wn)}
+input[type=text],textarea{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:12.5px}textarea{width:100%;min-height:90px;box-sizing:border-box;margin:8px 0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.js"></script>
+<script>
+const {useState,useMemo,useEffect}=React, html=htm.bind(React.createElement);
+const SEATS=120, CAST=4793641, INVALID=29947, VALID=CAST-INVALID, LEGAL=3.25, ELIG26=7331981;
+const fmt=n=>Math.round(n).toLocaleString('he-IL'), d2=n=>n.toFixed(2);
+const BL=[['n','גוש נתניהו','#4c8dff'],['l','גוש השינוי','#45c4b0'],['a','מפלגות ערביות','#9b5de5'],['o','אחר','#7c8b9a']];
+// id, שם, קולות (בפועל – 2022), גוש, צבע
+const P=[['likud','הליכוד',1115049,'n','#4c8dff'],['ya','יש עתיד',847145,'l','#45c4b0'],['rz','הציונות הדתית',516146,'n','#f2a93b'],['nu','המחנה הממלכתי',432376,'l','#9aa5b1'],['shas','ש״ס',392644,'n','#c9a227'],['utj','יהדות התורה',280125,'n','#6fcf97'],['ib','ישראל ביתנו',213655,'l','#5b8def'],['raam','רע״ם',193916,'l','#27ae60'],['hadash','חד״ש-תע״ל',178661,'a','#e85d75'],['labor','העבודה',175922,'l','#eb5757'],['meretz','מרצ',150696,'l','#2ecc71'],['balad','בל״ד',138093,'a','#b33771'],['jh','הבית היהודי',56793,'n','#8e6c3e'],['ef','חופש כלכלי',15817,'o','#7c8b9a'],['bo','באומץ בשבילך',14781,'o','#7c8b9a'],['ne','הכלכלית החדשה',13911,'o','#7c8b9a'],['hd','צעירים בוערים',8794,'o','#7c8b9a'],['ot','רשימות קטנות נוספות',19170,'o','#4a5262']].map(([id,name,v,b,c])=>({id,name,v,b,c}));
+const AG=[['likud','rz'],['shas','utj'],['ya','nu'],['labor','meretz']]; // הסכמי עודפים 2022
+const E25={parties:P,AG,valid:VALID,cast:CAST,elig:6788804};
+const PAL=['#4c8dff','#45c4b0','#f2a93b','#9aa5b1','#c9a227','#6fcf97','#5b8def','#27ae60','#e85d75','#eb5757','#2ecc71','#b33771','#9b5de5','#8e6c3e'];
+const EMPTY={parties:[],AG:[],valid:0,cast:0,elig:0,inv:0,rows:[]};
+
+// חישוב בדר-עופר צעד אחר צעד
+function calc(P,AG,thr){
+  const pass=P.filter(p=>p.v>=thr).map(p=>({...p}));
+  if(!pass.length) return {pass,total:0,q:0,left:0,rounds:[],G:[]};
+  const total=pass.reduce((s,p)=>s+p.v,0), q=total/SEATS;
+  pass.forEach(p=>{p.exact=p.v/q;p.whole=Math.floor(p.exact);p.rem=p.v-p.whole*q;p.sur=0});
+  const by=Object.fromEntries(pass.map(p=>[p.id,p])), used=new Set(), G=[];
+  AG.forEach(([a,b])=>{if(by[a]&&by[b]){G.push({m:[by[a],by[b]]});used.add(a);used.add(b)}});
+  pass.forEach(p=>{if(!used.has(p.id))G.push({m:[p]})});
+  G.forEach(g=>{g.v=g.m.reduce((s,p)=>s+p.v,0);g.s=g.m.reduce((s,p)=>s+p.whole,0);g.name=g.m.map(p=>p.name).join(' + ')});
+  const left=SEATS-pass.reduce((s,p)=>s+p.whole,0), rounds=[];
+  for(let r=1;r<=left;r++){
+    const R=G.map(g=>({g,x:g.v/(g.s+1)})).sort((a,b)=>b.x-a.x), w=R[0].g;
+    let who=w.m[0];
+    if(w.m.length>1) who=w.m.slice().sort((a,b)=>b.v/(b.whole+b.sur+1)-a.v/(a.whole+a.sur+1))[0];
+    who.sur++; w.s++;
+    rounds.push({r,g:w.name,x:R[0].x,who:who.name,pair:w.m.length>1,next:R[1]&&R[1].x});
+  }
+  pass.forEach(p=>p.seats=p.whole+p.sur);
+  return {pass,total,q,left,rounds,G};
+}
+
+const LET={'מחל':'הליכוד','ט':'הציונות הדתית וזהות','שס':'ש״ס','ג':'יהדות התורה','דרך':'ישר! (איזנקוט)','אמת':'הדמוקרטים','רק':'ביחד (בנט-לפיד)','ל':'ישראל ביתנו','עם':'רע״ם','ודם':'הרשימה המשותפת','ב':'עוצמה יהודית','די':'המילואימניקים והכלכלית','ך':'עמך ישראל','ני':'נעם','זך':'הציבור החרדי','פה':'אני ואתה','בי':'צומת בית ישראל','ד':'השותפות לכולם','בד':'ביחד נצליח','ק':'תקומה','זץ':'ברית עולם','נקי':'התיקון','צף':'הפיראטים','צדק':'שרשר לאהבה','קה':'קול הנשים','קץ':'משפט צדק','נץ':'ביטחון אישי','י':'ישראל תחילה','ה':'גן עדן','בקר':'אורות השחר','יק':'גה״ת','ז':'בטח','קך':'סדר חדש','נר':'צבע שחור','נף':'שמע'};
+const AG26=[['מחל','ט'],['שס','ג'],['דרך','אמת'],['רק','ל'],['עם','ודם']]; // הסכמי עודפים 2026, לפי אות הרשימה
+function csv(t){const R=[];let r=[],c='',q=false;t=t.replace(/^\uFEFF/,'');for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=ch}else if(ch=='"')q=true;else if(ch==','){r.push(c);c=''}else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';if(r.some(x=>x))R.push(r);r=[]}else c+=ch}if(c||r.length){r.push(c);R.push(r)}return R}
+function build(R){
+  const H=R[0].map(x=>x.trim()),Ls=H.map((h,i)=>[h,i]).slice(7).filter(([h])=>h);
+  const rows=R.slice(1).filter(r=>r[1]&&r[1].trim()).map(r=>({n:r[1].trim(),el:+r[3]||0,vt:+r[4]||0,inv:+r[5]||0,val:+r[6]||0,v:Object.fromEntries(Ls.map(([h,i])=>[h,+r[i]||0]).filter(([,x])=>x))}));
+  const tot={};rows.forEach(r=>Object.entries(r.v).forEach(([k,x])=>tot[k]=(tot[k]||0)+x));
+  const BIBI_CODES=new Set(['מחל','ט','ב','שס','ך','ג']);
+  const parties=Object.entries(tot).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>({id:k,name:LET[k]||'רשימה '+k,v,c:PAL[i%PAL.length],b:BIBI_CODES.has(k)?'n':'o'}));
+  const S=f=>rows.reduce((s,r)=>s+r[f],0);
+  return {parties,AG:AG26,valid:S('val'),cast:S('vt'),elig:S('el'),inv:S('inv'),rows};
+}
+function useCsv(){
+  const [d,setD]=useState(null),[st,setSt]=useState('load'),[err,setErr]=useState(''),[upd,setUpd]=useState(null),[sec,setSec]=useState(300),[manual,setManual]=useState(false);
+  const fail=e=>{setSt('err');setErr(location.protocol==='file:'?'הדף נפתח כקובץ מקומי (file://), והדפדפן חוסם קריאה אוטומטית של expc.csv מהתיקייה. הריצו שרת מקומי בתיקייה (python -m http.server) ופתחו http://localhost:8000/elections26.html, או בחרו את הקובץ ידנית.':'הקריאה של expc.csv נכשלה ('+e.message+'). ודאו שהקובץ נמצא באותה תיקייה כמו הדף.')};
+  const ok=(t,m)=>{const x=build(csv(t));if(!x.rows.length)throw new Error('הקובץ ריק או במבנה לא צפוי');setD(x);setSt('ok');setErr('');setUpd(new Date());setManual(m)};
+  const load=async()=>{setSec(300);try{const r=await fetch('expc.csv?_='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);ok(await r.text(),false)}catch(e){fail(e)}};
+  const onFile=t=>{try{ok(t,true)}catch(e){setErr('הקובץ שנבחר לא תקין: '+e.message);setSt('err')}};
+  useEffect(()=>{if(manual)return;load();const a=setInterval(load,300000),b=setInterval(()=>setSec(x=>x>0?x-1:0),1000);return()=>{clearInterval(a);clearInterval(b)}},[manual]);
+  return {d,st,err,upd,sec,manual,load,onFile,auto:()=>setManual(false)};
+}
+function FilePanel({E,S}){
+  const ok=S.st==='ok',has=E.rows.length>0,t=S.upd?S.upd.toLocaleTimeString('he-IL'):'—';
+  return html`<div class="card" style=${{marginTop:12}}>
+    <b class=${ok?'ok':'wn'}>${S.st==='load'&&!has?'קורא את expc.csv…':ok?(S.manual?'● נטען ידנית':'● נקרא אוטומטית מ-expc.csv'):has?'הקריאה האחרונה נכשלה – מוצגים נתונים מ-'+t:'לא ניתן לקרוא את expc.csv'}</b>
+    ${S.err?html`<p class="wn">${S.err}</p>`:''}
+    ${has?html`<div class="mu" style=${{margin:'6px 0'}}>${E.rows.length} יישובים · ${fmt(E.cast)} קולות נספרו בקובץ (${d2(E.cast/ELIG26*100)}% מתוך ${fmt(ELIG26)} בעלי זכות בחירה). אם האחוז נמוך מאחוז ההצבעה הצפוי (כ-70%), הנתונים חלקיים והמנדטים אינם תחזית לתוצאה הארצית.</div>`:''}
+    <div class="row"><span class="mu">עודכן: <span class="n">${t}</span>${S.manual?' · הרענון האוטומטי מושהה':' · רענון הבא בעוד '}${S.manual?'':html`<span class="n">${S.sec}s</span> (כל 5 דקות)`}</span>
+      ${S.manual?html`<button class="b" onClick=${S.auto}>חזרה לקריאה אוטומטית</button>`:html`<button class="b" onClick=${S.load}>רענן עכשיו</button>`}</div>
+    <div class="row" style=${{marginTop:8}}><span class="mu">בחירת קובץ ידנית:</span><input type="file" accept=".csv,text/csv" onChange=${e=>{const f=e.target.files[0];if(f)f.text().then(S.onFile)}}/></div></div>`;
+}
+const pc=(a,b)=>b?d2(a/b*100)+'%':'—';
+function City({E,city,setCity}){
+  const nm=k=>(E.parties.find(p=>p.id===k)||{}).name||k, top=r=>Object.entries(r.v).sort((a,b)=>b[1]-a[1]);
+  const names=[...E.rows].sort((a,b)=>a.n.localeCompare(b.n,'he')), sel=E.rows.find(r=>r.n===city);
+  const all=[...E.rows].sort((a,b)=>b.val-a.val);
+  return html`<div>
+    <h2>בחירת יישוב</h2>
+    <select value=${city} onChange=${e=>setCity(e.target.value)} style=${{background:'var(--bg)',color:'var(--tx)',border:'1px solid var(--line)',borderRadius:6,padding:'6px 10px',font:'inherit'}}>
+      <option value="">בחרו יישוב…</option>${names.map(r=>html`<option key=${r.n} value=${r.n}>${r.n}</option>`)}</select>
+    ${sel?html`<div class="card" style=${{marginTop:12}}>
+      <div class="stats" style=${{margin:0}}><div class="card"><span class="mu">בעלי זכות בחירה</span><b>${fmt(sel.el)}</b></div>
+        <div class="card"><span class="mu">אחוז הצבעה</span><b>${pc(sel.vt,sel.el)}</b></div>
+        <div class="card"><span class="mu">קולות כשרים / פסולים</span><b>${fmt(sel.val)} / ${fmt(sel.inv)}</b></div></div>
+      <div class="sc"><table><thead><tr><th>רשימה</th><th>אות</th><th>קולות</th><th>אחוז מהכשרים</th></tr></thead><tbody>
+        ${top(sel).map(([k,x])=>html`<tr key=${k}><td>${nm(k)}</td><td>${k}</td><td class="n">${fmt(x)}</td><td class="n">${pc(x,sel.val)}</td></tr>`)}</tbody></table></div></div>`:''}
+    <h2>כל היישובים (לפי קולות כשרים)</h2>
+    <div class="card sc"><table><thead><tr><th>יישוב</th><th>בעלי זכות</th><th>מצביעים</th><th>הצבעה</th><th>כשרים</th><th>רשימה מובילה</th><th>אחוז</th><th>מקום שני</th></tr></thead><tbody>
+      ${all.map(r=>{const t=top(r);return html`<tr key=${r.n} onClick=${()=>setCity(r.n)} style=${{cursor:'pointer'}}><td>${r.n}</td><td class="n">${fmt(r.el)}</td><td class="n">${fmt(r.vt)}</td><td class="n">${pc(r.vt,r.el)}</td><td class="n">${fmt(r.val)}</td>
+        <td>${t[0]?nm(t[0][0]):'—'}</td><td class="n">${t[0]?pc(t[0][1],r.val):'—'}</td><td>${t[1]?nm(t[1][0])+' ('+pc(t[1][1],r.val)+')':'—'}</td></tr>`})}
+    </tbody></table></div></div>`;
+}
+function App(){
+  const [tab,setTab]=useState(0), [pct,setPct]=useState(LEGAL), [el,setEl]=useState(26), [city,setCity]=useState(''), S=useCsv(), d26=S.d;
+  const E=el===25?E25:(d26||EMPTY), VALID=E.valid, thr=VALID*pct/100, C=useMemo(()=>calc(E.parties,E.AG,thr),[E,thr]);
+  const sorted=useMemo(()=>[...C.pass].sort((a,b)=>b.seats-a.seats),[C]);
+  const seatOf=Object.fromEntries(C.pass.map(p=>[p.id,p.seats]));
+  const blocs=el===25?BL.map(([id,name,c])=>({id,name,c,s:C.pass.filter(p=>p.b===id).reduce((s,p)=>s+p.seats,0)})):[{id:'n',name:'גוש ביבי',c:'#4c8dff',s:C.pass.filter(p=>p.b==='n').reduce((s,p)=>s+p.seats,0)},{id:'o',name:'גוש הנגד / האופוזיציה',c:'#45c4b0',s:C.pass.filter(p=>p.b!=='n').reduce((s,p)=>s+p.seats,0)}];
+  const max=Math.max(1,...sorted.map(p=>p.seats));
+  const Sw=html`<div class="tabs"><button class=${el===25?'on':''} onClick=${()=>setEl(25)}>בחירות 2022 · כנסת 25</button><button class=${el===26?'on':''} onClick=${()=>setEl(26)}>בחירות 2026 · כנסת 26</button></div>`, panel=html`<${FilePanel} E=${E} S=${S}/>`;
+  if(el===26&&!d26)return html`<div class="w">${Sw}<h1>תוצאות הבחירות לכנסת ה-26 · חישוב מנדטים</h1>${panel}</div>`;
+  return html`<div class="w">
+    ${Sw}
+    <h1>תוצאות הבחירות לכנסת ה-${el} · חישוב מנדטים</h1>
+    <div class="mu">${el===25?'קולות רשמיים סופיים, 1.11.2022. הסכמי עודפים 2022.':'הסכמי עודפים 2026: ליכוד–הציונות הדתית, ש״ס–יהדות התורה, ישר–הדמוקרטים, ביחד–ישראל ביתנו, רע״ם–המשותפת. בגוש ביבי נכללות: הליכוד, הציונות הדתית וזהות, עוצמה יהודית, ש״ס, עמך ישראל ויהדות התורה; כל שאר הרשימות בגוש הנגד / האופוזיציה.'} המנדטים מחושבים באתר.</div>
+    ${el===26?panel:''}
+    <div class="tabs">
+      <button class=${tab===0?'on':''} onClick=${()=>setTab(0)}>דשבורד</button>
+      <button class=${tab===1?'on':''} onClick=${()=>setTab(1)}>חישוב מנדטים שלב אחר שלב</button>
+      ${el===26?html`<button class=${tab===2?'on':''} onClick=${()=>setTab(2)}>לפי יישוב</button>`:''}
+    </div>
+    <div class="card"><div class="row"><b>סף חסימה:</b>
+      <input type="range" min="0" max="10" step="0.05" value=${pct} onInput=${e=>setPct(+e.target.value)}/>
+      <input type="number" step="0.01" min="0" max="10" value=${d2(pct)} onChange=${e=>setPct(Math.max(0,+e.target.value||0))}/>%
+      <span class="mu">או בקולות:</span>
+      <input type="number" step="1000" min="0" value=${Math.round(thr)} onChange=${e=>setPct(Math.max(0,(+e.target.value||0)/VALID*100))}/>
+      <button class="b" onClick=${()=>setPct(LEGAL)}>איפוס ל-3.25%</button></div>
+      <div class="mu" style=${{marginTop:8}}>נדרשים לפחות <span class="hl">${fmt(thr)}</span> קולות מתוך ${fmt(VALID)} כשרים כדי לעבור את הסף.</div></div>
+    ${tab===2&&el===26?html`<${City} E=${E} city=${city} setCity=${setCity}/>`:tab===1?html`<${Steps} C=${C}/>`:html`<${Dash} C=${C} sorted=${sorted} blocs=${blocs} max=${max} seatOf=${seatOf} thr=${thr} E=${E}/>`}
+  </div>`;
+}
+
+function Dash({C,sorted,blocs,max,seatOf,thr,E}){
+  const all=[...E.parties].sort((a,b)=>b.v-a.v);
+  return html`<div>
+    <div class="stats">
+      <div class="card"><span class="mu">${E===E25?'אחוז הצבעה':'קולות שנספרו בקובץ'}</span><b>${E.cast?(E===E25?d2(E.cast/E.elig*100)+'%':fmt(E.cast)):'—'}</b></div>
+    ${E!==E25?html`<div class="card"><span class="mu">אחוז מבעלי זכות הבחירה (${fmt(ELIG26)})</span><b>${E.cast?d2(E.cast/ELIG26*100)+'%':'—'}</b></div>`:''}
+      <div class="card"><span class="mu">קולות נדרשים לחסימה</span><b>${fmt(thr)}</b></div>
+      <div class="card"><span class="mu">רשימות מעל הסף</span><b>${C.pass.length}</b></div>
+    </div>
+    <h2>${E===E25?'גושים':'חלוקת מנדטים לפי גושים'} (61 לרוב)</h2>
+    <div class="bar">${blocs.filter(b=>b.s>0).map(b=>html`<div key=${b.id} style=${{width:b.s/SEATS*100+'%',background:b.c}}>${b.s}</div>`)}
+      <span style=${{position:'absolute',top:0,bottom:0,right:(61/SEATS*100)+'%',width:2,background:'var(--ac)'}}></span></div>
+    <div class="lg">${blocs.map(b=>html`<span key=${b.id}><i style=${{background:b.c}}></i>${b.name} (${b.s})</span>`)}</div>
+    <h2>מנדטים לפי מפלגה</h2>
+    <div class="card">${sorted.map(p=>html`<div class="pb" key=${p.id}><span class="l">${p.name}</span>
+      <div class="t"><div style=${{width:p.seats/max*100+'%',background:p.c}}></div></div><span class="v">${p.seats}</span></div>`)}</div>
+    <h2>כל הרשימות</h2>
+    <div class="card sc"><table><thead><tr><th>רשימה</th><th>קולות</th><th>אחוז</th><th>מנדטים</th><th>סטטוס</th></tr></thead><tbody>
+      ${all.map(p=>html`<tr key=${p.id} class=${p.v>=thr?'':'no'}><td>${p.name}</td><td class="n">${fmt(p.v)}</td><td class="n">${d2(p.v/E.valid*100)}%</td>
+        <td class="n"><b>${seatOf[p.id]||'—'}</b></td><td>${p.v>=thr?html`<span class="ok">עברה</span>`:html`<span class="wn">מתחת לסף</span>`}</td></tr>`)}
+    </tbody></table></div></div>`;
+}
+
+function Steps({C}){
+  if(!C.pass.length) return html`<p class="mu">אין רשימות מעל הסף.</p>`;
+  const sum=C.pass.reduce((s,p)=>s+p.whole,0), pairs=C.G.filter(g=>g.m.length>1);
+  const rows=[...C.pass].sort((a,b)=>b.v-a.v);
+  const St=({k,t,children})=>html`<div class="st"><div class="k">${k}</div><div style=${{flex:1,minWidth:0}}><b>${t}</b>${children}</div></div>`;
+  return html`<div>
+    <${St} k="1" t="המנה האלקטורלית">
+      <p>סוכמים את הקולות של הרשימות שעברו את הסף ומחלקים ב-120:</p>
+      <p class="n">${fmt(C.total)} ÷ ${SEATS} = <span class="hl">${d2(C.q)}</span> קולות למנדט</p><//>
+    <${St} k="2" t="מנדטים שלמים ושארית">
+      <p>לכל רשימה: קולות ÷ מנה, החלק השלם הוא המנדטים השלמים, והשארית היא מה שנשאר: קולות − (שלמים × מנה).</p>
+      <div class="card sc"><table><thead><tr><th>רשימה</th><th>קולות</th><th>קולות ÷ מנה</th><th>שלמים</th><th>שארית (קולות)</th></tr></thead><tbody>
+        ${rows.map(p=>html`<tr key=${p.id}><td>${p.name}</td><td class="n">${fmt(p.v)}</td><td class="n">${d2(p.exact)}</td><td class="n"><b>${p.whole}</b></td><td class="n">${fmt(p.rem)}</td></tr>`)}
+        <tr><td><b>סה״כ</b></td><td class="n">${fmt(C.total)}</td><td></td><td class="n"><b>${sum}</b></td><td></td></tr>
+      </tbody></table></div>
+      <p>נותרו <span class="hl">${C.left}</span> מנדטים לחלוקה (${SEATS} − ${sum}).</p><//>
+    <${St} k="3" t="איחוד רשימות עם הסכם עודפים">
+      ${pairs.length?html`<p>לצורך חלוקת העודפים בלבד, כל זוג נחשב כרשימה אחת: הקולות וגם המנדטים השלמים מצטברים.</p>
+        ${pairs.map(g=>html`<p key=${g.name} class="n">${g.name}: ${fmt(g.v)} קולות, ${g.s} שלמים</p>`)}`
+        :html`<p>אין הסכמי עודפים בין רשימות שעברו את הסף.</p>`}<//>
+    <${St} k="4" t="חלוקת העודפים – סיבוב אחר סיבוב">
+      <p>בכל סיבוב מחשבים לכל רשימה (או זוג): <span class="n">קולות ÷ (מנדטים עד כה + 1)</span>. הממוצע הגבוה ביותר זוכה במנדט נוסף. בזוג, המנדט עובר לשותפה עם הממוצע הגבוה יותר (לפי המנדטים שלה בלבד).</p>
+      <div class="card sc"><table><thead><tr><th>סיבוב</th><th>זוכה</th><th>ממוצע מנצח</th><th>הבא בתור</th><th>המנדט הלך ל</th></tr></thead><tbody>
+        ${C.rounds.map(r=>html`<tr key=${r.r}><td class="n">${r.r}</td><td>${r.g}</td><td class="n">${fmt(r.x)}</td><td class="n">${r.next?fmt(r.next):'—'}</td><td>${r.who}${r.pair?' (בזוג)':''}</td></tr>`)}
+      </tbody></table></div><//>
+    <${St} k="5" t="סיכום">
+      <div class="card sc"><table><thead><tr><th>רשימה</th><th>שלמים</th><th>עודפים</th><th>סה״כ מנדטים</th></tr></thead><tbody>
+        ${[...C.pass].sort((a,b)=>b.seats-a.seats).map(p=>html`<tr key=${p.id}><td>${p.name}</td><td class="n">${p.whole}</td><td class="n">${p.sur}</td><td class="n"><b>${p.seats}</b></td></tr>`)}
+      </tbody></table></div><//>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
